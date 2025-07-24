@@ -1,0 +1,48 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of go build
+/build/
+/bin/
+/dist/
+
+# IDE/editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Dependency directories (if vendoring is used)
+vendor/
+
+# Coverage & profiling files
+*.cover
+*.coverprofile
+*.cov
+*.prof
+
+# Logs
+*.log
+
+# Test result files
+*.tmp
+*.testresult
+
+# Private configuration files
+.env
+.env.*
+config.local.*
+
+/tmp
