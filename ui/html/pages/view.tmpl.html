@@ -1,0 +1,15 @@
+{{define "title"}} User #{{.User.Id}} {{end}}
+
+{{define "main"}}
+{{with .User}}
+<div class='snippet'>
+    <div class='metadata'> <strong>{{.Login}}</strong> <span>#{{.Id}}</span>
+    </div>
+    <pre><code>{{.Email}}</code></pre>
+    <div class='metadata'>
+        <time>Email: {{.Email}}</time>
+        <time>Role: {{.Role}}</time>
+    </div>
+</div>
+{{end}}
+{{end}}
