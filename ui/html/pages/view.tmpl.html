@@ -3,11 +3,13 @@
 {{define "main"}}
 {{with .User}}
 <div class='snippet'>
-    <div class='metadata'> <strong>{{.Login}}</strong> <span>#{{.Id}}</span>
-    </div>
-    <pre><code>{{.Email}}</code></pre>
     <div class='metadata'>
-        <time>Email: {{.Email}}</time>
+        <strong>{{.Login}}</strong> <span>#{{.Id}}</span>
+    </div>
+    <pre><code>Email: {{.Email}}</code></pre>
+    <pre><code>Created at: {{humanDate .CreatedAt}}</code></pre>
+
+    <div class='metadata'>
         <time>Role: {{.Role}}</time>
     </div>
 </div>

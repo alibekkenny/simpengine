@@ -2,32 +2,37 @@ package main
 
 import (
 	"database/sql"
-	"flag"
 	"log"
 	"net/http"
 	"os"
 
-	"github.com/alibekkenny/simpengine/internal/models"
-
+	"github.com/alibekkenny/simpengine/cmd/config"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type application struct {
-	errorLog *log.Logger
-	infoLog  *log.Logger
-	users    *models.UserModel
+	errorLog  *log.Logger
+	infoLog   *log.Logger
+	accessLog *log.Logger
+	config    *config.Config
 }
 
 func main() {
-	addr := flag.String("addr", ":4000", "HTTP Network address")
-	dsn := flag.String("dsn", "postgres://app:aliba@localhost:5432/simpengine?sslmode=disable", "PostgreSQL data source name")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-	flag.Parse()
+	addr := os.Getenv("ADDR")
+	dsn := os.Getenv("DSN")
+	jwt := os.Getenv("JWT_SECRET")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+	accessLog := log.New(os.Stdout, "ACCESS\t", log.Ldate|log.Ltime)
 
-	db, err := openDB(*dsn)
+	db, err := openDB(dsn)
 	if err != nil {
 		errorLog.Fatal(err)
 	}
@@ -36,20 +41,27 @@ func main() {
 	defer db.Close()
 
 	// Initialize a new instance of our application struct, containing the dependencies.
+	config := &config.Config{
+		JWTSecret: []byte(jwt),
+		DB:        db,
+	}
+
 	app := &application{
-		errorLog: errorLog,
-		infoLog:  infoLog,
-		users:    &models.UserModel{DB: db},
+		errorLog:  errorLog,
+		infoLog:   infoLog,
+		accessLog: accessLog,
+		config:    config,
 	}
 
 	srv := &http.Server{
-		Addr:     *addr,
+		Addr:     addr,
 		ErrorLog: errorLog,
 		Handler:  app.routes(),
 	}
 
-	infoLog.Printf("Starting server on %s", *addr)
+	infoLog.Printf("Starting server on %s", addr)
 	err = srv.ListenAndServe()
+
 	errorLog.Fatal(err)
 }
 
