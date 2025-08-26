@@ -41,7 +41,7 @@ func (h *SimpTargetHandler) CreateSimpTarget(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	w.Header().Set("Location", fmt.Sprintf("/simp-target/%s", simpTargetID))
+	w.Header().Set("Location", fmt.Sprintf("/simp-target/%d", simpTargetID))
 	json.NewEncoder(w).Encode(map[string]any{
 		"id":          simpTargetID,
 		"name":        body.Name,

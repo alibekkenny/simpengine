@@ -15,7 +15,7 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	handler := NewSimpTargetHandler(service, validator)
 
 	mux.Handle("POST /simp-target", auth.AuthMiddleware(http.HandlerFunc(handler.CreateSimpTarget)))
-	mux.Handle("PUT /simp-target", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateSimpTarget)))
+	mux.Handle("PUT /simp-target/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateSimpTarget)))
 	mux.Handle("DELETE /simp-target/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.DeleteSimpTarget)))
 	mux.Handle("GET /simp-target/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewSimpTarget)))
 	mux.Handle("GET /simp-target", auth.AuthMiddleware(http.HandlerFunc(handler.ViewSimpTargetByUser)))

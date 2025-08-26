@@ -30,7 +30,7 @@ func (r *PostgresRepository) CreateSimpTarget(ctx context.Context, name, descrip
 }
 
 func (r *PostgresRepository) UpdateSimpTarget(ctx context.Context, id int64, name, description string, userID int64) error {
-	stmt := `UPDATE simp_target SET name = $1, DESCRIPTION = $2 WHERE id = $3 AND user_id = $4`
+	stmt := `UPDATE simp_targets SET name = $1, DESCRIPTION = $2 WHERE id = $3 AND user_id = $4`
 
 	row, err := r.db.ExecContext(ctx, stmt, name, description, id, userID)
 	if err != nil {
