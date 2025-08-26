@@ -65,7 +65,7 @@ func (s *SimpTargetService) DeleteSimpTarget(ctx context.Context, id int64) erro
 	return nil
 }
 
-func (s *SimpTargetService) GetSimpTargetsByUserID(ctx context.Context) ([]SimpTarget, error) {
+func (s *SimpTargetService) GetSimpTargetsByUserID(ctx context.Context) ([]*SimpTarget, error) {
 	userID, ok := auth.GetUserIDFromContext(ctx)
 	if !ok {
 		return nil, model.ErrInvalidCredentials

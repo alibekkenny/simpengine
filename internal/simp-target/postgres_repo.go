@@ -67,7 +67,7 @@ func (r *PostgresRepository) DeleteSimpTarget(ctx context.Context, id int64, use
 	return nil
 }
 
-func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) ([]SimpTarget, error) {
+func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) ([]*SimpTarget, error) {
 	stmt := `SELECT id, name, description FROM simp_targets WHERE user_id = $1`
 	result, err := r.db.QueryContext(ctx, stmt, userID)
 	if err != nil {
@@ -75,7 +75,7 @@ func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) 
 	}
 	defer result.Close()
 
-	var simpTargets []SimpTarget
+	simpTargets := []*SimpTarget{}
 
 	for result.Next() {
 		var simpTarget SimpTarget
@@ -83,7 +83,7 @@ func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) 
 		if err != nil {
 			return nil, err
 		}
-		simpTargets = append(simpTargets, simpTarget)
+		simpTargets = append(simpTargets, &simpTarget)
 	}
 
 	return simpTargets, nil
