@@ -38,7 +38,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 }
 
 func GetUserIDFromContext(ctx context.Context) (int64, bool) {
-	id, ok := ctx.Value(userContextKey).(float64)
+	id, ok := ctx.Value(userContextKey).(int64)
 	return int64(id), ok
 }
 
