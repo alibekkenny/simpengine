@@ -17,7 +17,7 @@ func NewUserService(r UserRepository) *UserService {
 	return &UserService{repo: r}
 }
 
-func (s *UserService) Register(ctx context.Context, login, email, password string) (int, error) {
+func (s *UserService) Register(ctx context.Context, login, email, password string) (int64, error) {
 	if !isValidLogin(login) {
 		return 0, errors.New("invalid login format")
 	}

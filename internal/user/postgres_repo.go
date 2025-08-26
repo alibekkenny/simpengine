@@ -16,8 +16,8 @@ func NewPosgresRepository(db *sql.DB) *PostgresRepository {
 	return &PostgresRepository{db: db}
 }
 
-func (r *PostgresRepository) Create(ctx context.Context, user *User) (int, error) {
-	var id int
+func (r *PostgresRepository) Create(ctx context.Context, user *User) (int64, error) {
+	var id int64
 	stmt := `INSERT INTO users(login, email, password_hash, role, created_at) 
 			VALUES($1, $2, $3, $4, NOW()) RETURNING id`
 
@@ -26,10 +26,10 @@ func (r *PostgresRepository) Create(ctx context.Context, user *User) (int, error
 		return 0, err
 	}
 
-	return int(id), nil
+	return id, nil
 }
 
-func (r *PostgresRepository) FindById(ctx context.Context, id int) (*User, error) {
+func (r *PostgresRepository) FindById(ctx context.Context, id int64) (*User, error) {
 	user := &User{}
 	stmt := `SELECT id, login, email, password_hash, role, created_at FROM users WHERE id = $1`
 
