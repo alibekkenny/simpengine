@@ -91,7 +91,7 @@ func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) 
 
 func (r *PostgresRepository) FindByIDAndUserID(ctx context.Context, id, userID int64) (*SimpTarget, error) {
 	var target SimpTarget
-	stmt := `SELECT id, name, description FROM simp_targets WHERE id = ? AND user_id = ?`
+	stmt := `SELECT id, name, description FROM simp_targets WHERE id = $1 AND user_id = $2`
 
 	err := r.db.QueryRowContext(ctx, stmt, id, userID).Scan(&target.ID, &target.Name, &target.Description)
 	if err != nil {
@@ -106,7 +106,7 @@ func (r *PostgresRepository) FindByIDAndUserID(ctx context.Context, id, userID i
 
 func (r *PostgresRepository) FindByID(ctx context.Context, id int64) (*SimpTarget, error) {
 	var target SimpTarget
-	stmt := `SELECT id, name, description FROM simp_targets WHERE id = ?`
+	stmt := `SELECT id, name, description FROM simp_targets WHERE id = $1`
 
 	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&target.ID, &target.Name, &target.Description)
 	if err != nil {

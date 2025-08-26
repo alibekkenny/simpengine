@@ -86,6 +86,7 @@ func (s *SimpTargetService) GetSimpTargetByIDAndUser(ctx context.Context, id int
 
 	simpTarget, err := s.repo.FindByIDAndUserID(ctx, id, userID)
 	if err != nil {
+		fmt.Println(err, errors.Is(err, model.ErrNoRecord))
 		if errors.Is(err, model.ErrNoRecord) {
 			return nil, fmt.Errorf("%w: simp target not found", model.ErrNoRecord)
 		}
