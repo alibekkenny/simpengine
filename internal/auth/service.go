@@ -27,10 +27,5 @@ func (s *AuthService) Login(ctx context.Context, login, password string) (string
 		return "", model.ErrNoRecord
 	}
 
-	jwtToken, err := GenerateJWT(user.ID, user.Login)
-	if err != nil {
-		return "", err
-	}
-
-	return jwtToken, nil
+	return GenerateJWT(user.ID, user.Login)
 }

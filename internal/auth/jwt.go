@@ -13,7 +13,7 @@ func InitJWT(secret []byte) {
 	jwtSecret = secret
 }
 
-func GenerateJWT(userId int, login string) (string, error) {
+func GenerateJWT(userId int64, login string) (string, error) {
 	if jwtSecret == nil {
 		return "", errors.New("JWT secret not initialized")
 	}

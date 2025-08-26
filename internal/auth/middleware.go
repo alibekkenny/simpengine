@@ -8,7 +8,8 @@ import (
 
 type contextKey string
 
-const userContextKey contextKey = "userID"
+const userContextKey contextKey = "user_id"
+const roleContextKey contextKey = "role"
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -31,12 +32,17 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userContextKey, int(userID))
+		ctx := context.WithValue(r.Context(), userContextKey, int64(userID))
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func GetUserIDFromContext(ctx context.Context) (string, bool) {
-	id, ok := ctx.Value(userContextKey).(string)
-	return id, ok
+func GetUserIDFromContext(ctx context.Context) (int64, bool) {
+	id, ok := ctx.Value(userContextKey).(float64)
+	return int64(id), ok
+}
+
+func GetRoleFromContext(ctx context.Context) (string, bool) {
+	role, ok := ctx.Value(roleContextKey).(string)
+	return role, ok
 }
