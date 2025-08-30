@@ -1,6 +1,7 @@
 package simptarget
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/alibekkenny/simpengine/cmd/config"
@@ -8,11 +9,19 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
-	repo := NewPosgresRepository(cfg.DB)
+type Module struct {
+	Service *SimpTargetService
+}
+
+func NewModule(db *sql.DB) *Module {
+	repo := NewPosgresRepository(db)
 	service := NewSimpTargetService(repo)
+	return &Module{Service: service}
+}
+
+func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	validator := validator.New()
-	handler := NewSimpTargetHandler(service, validator)
+	handler := NewSimpTargetHandler(m.Service, validator)
 
 	mux.Handle("POST /simp-target", auth.AuthMiddleware(http.HandlerFunc(handler.CreateSimpTarget)))
 	mux.Handle("PUT /simp-target/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateSimpTarget)))

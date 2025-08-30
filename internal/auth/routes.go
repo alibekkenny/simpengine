@@ -8,13 +8,20 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
+type Module struct {
+	Service *AuthService
+}
+
+func NewModule(repo user.UserRepository) *Module {
+	service := NewAuthService(repo)
+	return &Module{Service: service}
+}
+
+func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	InitJWT(cfg.JWTSecret)
 
-	repo := user.NewPosgresRepository(cfg.DB)
-	service := NewAuthService(repo)
 	validator := validator.New()
-	handler := NewAuthHandler(service, validator)
+	handler := NewAuthHandler(m.Service, validator)
 
 	mux.HandleFunc("POST /user/login", handler.Login)
 }

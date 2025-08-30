@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	adminInvite "github.com/alibekkenny/simpengine/internal/admin_invite"
 	"github.com/alibekkenny/simpengine/internal/auth"
+	romanticevent "github.com/alibekkenny/simpengine/internal/romantic_event"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/alibekkenny/simpengine/internal/user"
 	"github.com/justinas/alice"
@@ -13,13 +13,15 @@ import (
 func (app *application) routes() http.Handler {
 	mux := http.NewServeMux()
 
-	fileServer := http.FileServer(http.Dir("./ui/static/"))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	userModule := user.NewModule(app.config.DB)
+	authModule := auth.NewModule(userModule.Repo)
+	simpTargetModule := simptarget.NewModule(app.config.DB)
+	romanticEventModule := romanticevent.NewModule(app.config.DB, simpTargetModule.Service)
 
-	user.RegisterRoutes(mux, app.config)
-	adminInvite.RegisterRoutes(mux, app.config)
-	auth.RegisterRoutes(mux, app.config)
-	simptarget.RegisterRoutes(mux, app.config)
+	userModule.RegisterRoutes(mux, app.config)
+	authModule.RegisterRoutes(mux, app.config)
+	simpTargetModule.RegisterRoutes(mux, app.config)
+	romanticEventModule.RegisterRoutes(mux, app.config)
 
 	// chain of middleware
 	standardChain := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
