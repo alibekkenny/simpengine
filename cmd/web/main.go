@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/alibekkenny/simpengine/cmd/config"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -19,11 +18,6 @@ type application struct {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	addr := os.Getenv("ADDR")
 	dsn := os.Getenv("DSN")
 	jwt := os.Getenv("JWT_SECRET")

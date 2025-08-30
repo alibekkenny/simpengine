@@ -1,0 +1,52 @@
+version: "3.8"
+
+services:
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: simpengine_backend
+    depends_on:
+      - db
+      - minio
+    environment:
+      ADDR: :8080
+      DSN: postgres://postgres:postgres@db:5432/simpengine?sslmode=disable
+      JWT_SECRET: mars-opr
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      MINIO_BUCKET: simpengine
+    ports:
+      - "8080:8080"
+
+  db:
+    image: postgres:17
+    container_name: simpengine_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: simpengine
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: simpengine_minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000" # API
+      - "9001:9001" # Console
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:
