@@ -1,0 +1,1 @@
+DROP TABLE event_step_options;
