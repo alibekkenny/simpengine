@@ -10,17 +10,19 @@ import (
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
+	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/google/uuid"
 )
 
 type RomanticEventService struct {
-	repo       repository.RomaticEventRepository
-	stepRepo   repository.EventStepRepository
-	optionRepo repository.EventStepOptionRepository
+	repo              repository.RomaticEventRepository
+	stepRepo          repository.EventStepRepository
+	optionRepo        repository.EventStepOptionRepository
+	simpTargetService *simptarget.SimpTargetService
 }
 
-func NewRomanticEventService(repo repository.RomaticEventRepository, stepRepo repository.EventStepRepository, optionRepo repository.EventStepOptionRepository) *RomanticEventService {
-	return &RomanticEventService{repo: repo, stepRepo: stepRepo, optionRepo: optionRepo}
+func NewRomanticEventService(repo repository.RomaticEventRepository, stepRepo repository.EventStepRepository, optionRepo repository.EventStepOptionRepository, simpTargetService *simptarget.SimpTargetService) *RomanticEventService {
+	return &RomanticEventService{repo: repo, stepRepo: stepRepo, optionRepo: optionRepo, simpTargetService: simpTargetService}
 }
 
 func (s *RomanticEventService) CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, simpTargetID int64) (int64, error) {
@@ -29,8 +31,15 @@ func (s *RomanticEventService) CreateRomanticEvent(ctx context.Context, eventDat
 		return 0, model.ErrInvalidCredentials
 	}
 
+	if _, err := s.simpTargetService.GetSimpTargetByIDAndUser(ctx, simpTargetID); err != nil {
+		return 0, err
+	}
+
 	simpTargetID, err := s.repo.CreateRomanticEvent(ctx, eventDate, title, description, simpTargetID, userID)
 	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return 0, fmt.Errorf("%w: simp target not found", model.ErrNoRecord)
+		}
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
@@ -43,10 +52,14 @@ func (s *RomanticEventService) UpdateRomanticEvent(ctx context.Context, id int64
 		return model.ErrInvalidCredentials
 	}
 
+	if _, err := s.simpTargetService.GetSimpTargetByIDAndUser(ctx, simpTargetID); err != nil {
+		return err
+	}
+
 	err := s.repo.UpdateRomanticEvent(ctx, id, eventDate, title, description, simpTargetID, userID)
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
-			return fmt.Errorf("%w: romantic event not found")
+			return fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
 		}
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
@@ -92,28 +105,10 @@ func (s *RomanticEventService) GetRomanticEventByIDAndUserID(ctx context.Context
 		return nil, model.ErrInvalidCredentials
 	}
 
-	event, err := s.repo.FindByIDAndUserID(ctx, id, userID)
+	event, err := s.loadEventWithSteps(ctx, id, userID)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+		return nil, err
 	}
-
-	steps, err := s.stepRepo.FindAllByEventID(ctx, id)
-	if err != nil {
-		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
-	}
-
-	stepIDs := make([]int64, len(steps))
-	for i, st := range steps {
-		stepIDs[i] = st.ID
-	}
-
-	optionsByStep, err := s.optionRepo.FindAllByEventStepIDs(ctx, stepIDs)
-
-	for i, step := range steps {
-		steps[i].Options = optionsByStep[step.ID]
-	}
-
-	event.Steps = steps
 
 	return event, nil
 }
@@ -164,7 +159,7 @@ func (s *RomanticEventService) RemoveStep(ctx context.Context, id int64, eventID
 	return nil
 }
 
-func (s *RomanticEventService) AddOption(ctx context.Context, label, description string, imgID uuid.UUID, eventID int64, eventStepID int64) (int64, error) {
+func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgID uuid.UUID, eventID int64, eventStepID int64) (int64, error) {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return 0, err
@@ -178,7 +173,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label, description
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	id, err := s.optionRepo.CreateEventStepOption(ctx, label, description, imgID, eventStepID)
+	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
 	if err != nil {
 		return 0, err
 	}
@@ -186,7 +181,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label, description
 	return id, nil
 }
 
-func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label, description string, imgID uuid.UUID, eventID int64, eventStepID int64) error {
+func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label string, imgID uuid.UUID, eventID int64, eventStepID int64) error {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return err
@@ -200,7 +195,7 @@ func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, description, imgID); err != nil {
+	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return fmt.Errorf("%w: option not found", model.ErrNoRecord)
 		}
@@ -249,4 +244,52 @@ func (s *RomanticEventService) ensureEventOwnership(ctx context.Context, eventID
 	}
 
 	return userID, nil
+}
+
+func (s *RomanticEventService) loadEventWithSteps(ctx context.Context, eventID, userID int64) (*rmodel.RomanticEvent, error) {
+	event, err := s.repo.FindByIDAndUserID(ctx, eventID, userID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return nil, fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+		}
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	steps, err := s.stepRepo.FindAllByEventID(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.attachOptions(ctx, steps); err != nil {
+		return nil, err
+	}
+
+	event.Steps = steps
+	return event, nil
+}
+
+func (s *RomanticEventService) attachOptions(ctx context.Context, steps []*rmodel.EventStep) error {
+	if len(steps) == 0 {
+		return nil
+	}
+
+	stepIDs := make([]int64, len(steps))
+	for i, st := range steps {
+		stepIDs[i] = st.ID
+	}
+
+	optionsByStep, err := s.optionRepo.FindAllByEventStepIDs(ctx, stepIDs)
+	if err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	for i, step := range steps {
+		if opts, ok := optionsByStep[step.ID]; ok {
+			steps[i].Options = opts
+		} else {
+			steps[i].Options = []*rmodel.EventStepOption{}
+		}
+	}
+
+	return nil
 }

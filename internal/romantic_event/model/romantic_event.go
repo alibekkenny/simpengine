@@ -9,5 +9,5 @@ type RomanticEvent struct {
 	Description  string       `json:"description"`
 	SimpTargetID int64        `json:"simp_target_id"`
 	UserID       int64        `json:"-"`
-	Steps        []*EventStep `json:"steps"`
+	Steps        []*EventStep `json:"-"`
 }

@@ -114,7 +114,14 @@ func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(event)
+	json.NewEncoder(w).Encode(RomanticEventResponseDTO{
+		ID:           event.ID,
+		EventDate:    event.EventDate,
+		Title:        event.Title,
+		Description:  event.Description,
+		SimpTargetID: event.SimpTargetID,
+		Steps:        event.Steps,
+	})
 }
 
 // ViewRomanticEventByUser
@@ -250,7 +257,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	id, err := h.service.AddOption(r.Context(), body.Label, body.Description, body.ImgID, eventID, stepID)
+	id, err := h.service.AddOption(r.Context(), body.Label, body.ImgID, eventID, stepID)
 	if err != nil {
 		code, msg := model.ErrorStatus(err)
 		http.Error(w, msg, code)
@@ -259,10 +266,9 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]any{
-		"id":          id,
-		"label":       body.Label,
-		"description": body.Description,
-		"img_id":      body.ImgID,
+		"id":     id,
+		"label":  body.Label,
+		"img_id": body.ImgID,
 	})
 }
 
@@ -299,7 +305,7 @@ func (h *RomanticEventHandler) UpdateStepOption(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := h.service.UpdateOption(r.Context(), id, body.Label, body.Description, body.ImgID, eventID, stepID); err != nil {
+	if err := h.service.UpdateOption(r.Context(), id, body.Label, body.ImgID, eventID, stepID); err != nil {
 		code, msg := model.ErrorStatus(err)
 		http.Error(w, msg, code)
 		return

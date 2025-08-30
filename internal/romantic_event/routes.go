@@ -1,22 +1,33 @@
 package romanticevent
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/alibekkenny/simpengine/cmd/config"
 	"github.com/alibekkenny/simpengine/internal/auth"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository/postgres"
+	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/go-playground/validator/v10"
 )
 
-func RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
-	eventRepo := postgres.NewRomanticEventRepository(cfg.DB)
-	stepRepo := postgres.NewEventStepRepository(cfg.DB)
-	optionRepo := postgres.NewEventStepOptionRepository(cfg.DB)
+type Module struct {
+	Service *RomanticEventService
+}
 
-	service := NewRomanticEventService(repo)
+func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService) *Module {
+	eventRepo := postgres.NewRomanticEventRepository(db)
+	stepRepo := postgres.NewEventStepRepository(db)
+	optionRepo := postgres.NewEventStepOptionRepository(db)
+
+	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService)
+
+	return &Module{Service: service}
+}
+
+func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	validator := validator.New()
-	handler := NewRomanticEventHandler(service, validator)
+	handler := NewRomanticEventHandler(m.Service, validator)
 
 	mux.Handle("POST /romantic-event", auth.AuthMiddleware(http.HandlerFunc(handler.CreateRomanticEvent)))
 	mux.Handle("PUT /romantic-event/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateRomanticEvent)))
@@ -30,5 +41,5 @@ func RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 
 	mux.Handle("POST /romantic-event/{event_id}/steps/{step_id}/options", auth.AuthMiddleware(http.HandlerFunc(handler.AddStepOption)))
 	mux.Handle("PUT /romantic-event/{event_id}/steps/{step_id}/options/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateStepOption)))
-	mux.Handle("POST /romantic-event/{event_id}/steps/{step_id}/options/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.RemoveStepOption)))
+	mux.Handle("DELETE /romantic-event/{event_id}/steps/{step_id}/options/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.RemoveStepOption)))
 }

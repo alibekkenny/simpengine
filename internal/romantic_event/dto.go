@@ -3,6 +3,7 @@ package romanticevent
 import (
 	"time"
 
+	"github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/google/uuid"
 )
 
@@ -13,6 +14,15 @@ type RomanticEventRequestDTO struct {
 	SimpTargetID int64     `json:"simp_target_id" validate:"required"`
 }
 
+type RomanticEventResponseDTO struct {
+	ID           int64              `json:"id"`
+	EventDate    time.Time          `json:"event_date"`
+	Title        string             `json:"title"`
+	Description  string             `json:"description"`
+	SimpTargetID int64              `json:"simp_target_id"`
+	Steps        []*model.EventStep `json:"steps"`
+}
+
 type EventStepRequestDTO struct {
 	Title       string `json:"title" validate:"required,min=3"`
 	Description string `json:"description" validate:"required"`
@@ -20,7 +30,6 @@ type EventStepRequestDTO struct {
 }
 
 type StepOptionRequestDTO struct {
-	Label       string    `json:"label" validate:"required,min=3"`
-	Description string    `json:"description" validate:"required"`
-	ImgID       uuid.UUID `json:"img_id" validate:"required"`
+	Label string    `json:"label" validate:"required,min=3"`
+	ImgID uuid.UUID `json:"img_id" validate:"required"`
 }

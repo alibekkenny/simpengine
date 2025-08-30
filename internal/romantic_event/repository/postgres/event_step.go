@@ -20,7 +20,7 @@ func NewEventStepRepository(db *sql.DB) EventStepRepository {
 // CreateEventStep(ctx context.Context, title, description string, eventID int64) (int64, error)
 func (r EventStepRepository) CreateEventStep(ctx context.Context, title, descripion string, stepOrder int32, eventID int64) (int64, error) {
 	var id int64
-	stmt := `INSET INTO event_steps(title, description, step_order, event_id) 
+	stmt := `INSERT INTO event_steps(title, description, step_order, event_id) 
 	VALUES($1, $2, $3, $4) RETURNING id`
 
 	if err := r.db.QueryRowContext(ctx, stmt, title, descripion, stepOrder, eventID).Scan(&id); err != nil {
@@ -72,7 +72,7 @@ func (r EventStepRepository) DeleteEventStep(ctx context.Context, id int64) erro
 
 // FindAllByEventID(ctx context.Context, eventID int64) ([]*models.EventStep, error)
 func (r EventStepRepository) FindAllByEventID(ctx context.Context, eventID int64) ([]*rmodel.EventStep, error) {
-	stmt := `SELECT id, title, description, event_id, step_order FROM event_steps WHERE event_id = $1`
+	stmt := `SELECT id, title, description, event_id, step_order FROM event_steps WHERE event_id = $1 ORDER BY step_order ASC`
 
 	rows, err := r.db.QueryContext(ctx, stmt, eventID)
 	if err != nil {

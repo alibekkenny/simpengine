@@ -7,6 +7,7 @@ import (
 	"time"
 
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
+	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 )
 
@@ -25,7 +26,7 @@ func (r RomanticEventRepository) CreateRomanticEvent(ctx context.Context, eventD
 	VALUES($1, $2, $3, $4, $5) RETURNING id`
 
 	if err := r.db.QueryRowContext(ctx, stmt, eventDate, title, description, simpTargetID, userID).Scan(&id); err != nil {
-		return 0, err
+		return 0, db.MapPQError(err)
 	}
 
 	return id, nil
