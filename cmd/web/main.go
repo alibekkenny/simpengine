@@ -8,6 +8,8 @@ import (
 
 	"github.com/alibekkenny/simpengine/cmd/config"
 	_ "github.com/lib/pq"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
 type application struct {
@@ -21,6 +23,10 @@ func main() {
 	addr := os.Getenv("ADDR")
 	dsn := os.Getenv("DSN")
 	jwt := os.Getenv("JWT_SECRET")
+	minioUrl := os.Getenv("MINIO_ENDPOINT")
+	minioBucketName := os.Getenv("MINIO_BUCKET")
+	minioAccesKey := os.Getenv("MINIO_ACCESS_KEY")
+	minioSecretKey := os.Getenv("MINIO_SECRET_KEY")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -34,10 +40,20 @@ func main() {
 	// We also defer a call to db.Close(), so that the connection pool is closed // before the main() function exits.
 	defer db.Close()
 
+	minioClient, err := minio.New(minioUrl, &minio.Options{
+		Creds:  credentials.NewStaticV4(minioAccesKey, minioSecretKey, ""),
+		Secure: false,
+	})
+	if err != nil {
+		errorLog.Fatal(err)
+	}
+
 	// Initialize a new instance of our application struct, containing the dependencies.
 	config := &config.Config{
-		JWTSecret: []byte(jwt),
-		DB:        db,
+		JWTSecret:       []byte(jwt),
+		DB:              db,
+		MinioClient:     minioClient,
+		MinioBucketName: minioBucketName,
 	}
 
 	app := &application{

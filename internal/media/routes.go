@@ -15,17 +15,12 @@ type Module struct {
 	Service *MediaService
 }
 
-func NewModule(db *sql.DB, minioEndpoint string, bucketName string) (*Module, error) {
-	client, err := minio.New(minioEndpoint, &minio.Options{})
-	if err != nil {
-		return nil, err
-	}
-
-	fileRepo := minio_repo.NewMinioRepository(client, bucketName)
+func NewModule(db *sql.DB, minioClient *minio.Client, bucketName string) *Module {
+	fileRepo := minio_repo.NewMinioRepository(minioClient, bucketName)
 	mediaRepo := postgres.NewMediaRepository(db)
 	service := NewMediaService(mediaRepo, fileRepo)
 
-	return &Module{Service: service}, nil
+	return &Module{Service: service}
 }
 
 func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {

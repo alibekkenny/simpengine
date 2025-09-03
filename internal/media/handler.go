@@ -53,7 +53,7 @@ func (h *MediaHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	media, object, err := h.service.GetFile(r.Context(), id)
+	media, object, err := h.service.DownloadFile(r.Context(), id)
 	if err != nil {
 		code, msg := model.ErrorStatus(err)
 		http.Error(w, msg, code)

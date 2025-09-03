@@ -7,4 +7,5 @@ type UserRepository interface {
 	FindById(ctx context.Context, id int64) (*User, error)
 	FindByLogin(ctx context.Context, login string) (*User, error)
 	ExistsByEmailOrLogin(ctx context.Context, email, login string) (bool, error)
+	ExistsByID(ctx context.Context, id int64) (bool, error)
 }

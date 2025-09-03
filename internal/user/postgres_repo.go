@@ -70,3 +70,13 @@ func (r *PostgresRepository) ExistsByEmailOrLogin(ctx context.Context, email, lo
 	err := r.db.QueryRowContext(ctx, stmt, email, login).Scan(&exists)
 	return exists, err
 }
+
+func (r *PostgresRepository) ExistsByID(ctx context.Context, id int64) (bool, error) {
+	var exists bool
+	stmt := `SELECT EXISTS (
+		SELECT 1 FROM users WHERE email = $1 OR login = $2
+	)`
+
+	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&exists)
+	return exists, err
+}

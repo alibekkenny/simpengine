@@ -49,7 +49,7 @@ func (s *MediaService) UploadFile(ctx context.Context, file multipart.File, file
 	return id, nil
 }
 
-func (s *MediaService) GetFile(ctx context.Context, id int64) (*media_model.Media, io.ReadSeekCloser, error) {
+func (s *MediaService) DownloadFile(ctx context.Context, id int64) (*media_model.Media, io.ReadSeekCloser, error) {
 	userID, ok := auth.GetUserIDFromContext(ctx)
 	if !ok {
 		return nil, nil, model.ErrInvalidCredentials

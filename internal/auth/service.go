@@ -29,3 +29,7 @@ func (s *AuthService) Login(ctx context.Context, login, password string) (string
 
 	return GenerateJWT(user.ID, user.Login)
 }
+
+func (s *AuthService) Exists(ctx context.Context, id int64) (bool, error) {
+	return s.repo.ExistsByID(ctx, id)
+}
