@@ -68,3 +68,20 @@ func (h *MediaHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
+func (h *MediaHandler) DeleteFile(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.service.DeleteFile(r.Context(), id); err != nil {
+		code, msg := model.ErrorStatus(err)
+		http.Error(w, msg, code)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

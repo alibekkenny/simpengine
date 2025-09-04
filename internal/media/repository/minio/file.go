@@ -34,5 +34,5 @@ func (r MinioRepository) Get(ctx context.Context, objectName string) (io.ReadSee
 
 // Delete(ctx context.Context, id int64) error
 func (r MinioRepository) Delete(ctx context.Context, objectName string) error {
-	return nil
+	return r.client.RemoveObject(ctx, r.bucketName, objectName, minio.RemoveObjectOptions{})
 }

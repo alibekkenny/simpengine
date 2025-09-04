@@ -70,3 +70,29 @@ func (s *MediaService) DownloadFile(ctx context.Context, id int64) (*media_model
 
 	return media, object, nil
 }
+
+func (s *MediaService) DeleteFile(ctx context.Context, id int64) error {
+	userID, ok := auth.GetUserIDFromContext(ctx)
+	if !ok {
+		return model.ErrInvalidCredentials
+	}
+
+	media, err := s.mediaRepo.FindByIDAndUserID(ctx, id, userID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: file not found", model.ErrNoRecord)
+		}
+
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.mediaRepo.Delete(ctx, id, userID); err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.fileRepo.Delete(ctx, media.ObjectName); err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return nil
+}

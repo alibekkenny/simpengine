@@ -27,5 +27,5 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	handler := NewMediaHandler(m.Service)
 	mux.Handle("POST /media", auth.AuthMiddleware(http.HandlerFunc(handler.UploadFile)))
 	mux.Handle("GET /media/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.DownloadFile)))
-	// mux.Handler("DELETE /media/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.DeleteFile)))
+	mux.Handle("DELETE /media/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.DeleteFile)))
 }

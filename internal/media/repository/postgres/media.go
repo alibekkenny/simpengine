@@ -46,5 +46,20 @@ func (r MediaRepository) FindByIDAndUserID(ctx context.Context, id int64, userID
 }
 
 func (r MediaRepository) Delete(ctx context.Context, id int64, userID int64) error {
+	stmt := `DELETE FROM media WHERE id = $1 AND user_id = $2`
+
+	rows, err := r.db.ExecContext(ctx, stmt, id, userID)
+	if err != nil {
+		return db.MapPQError(err)
+	}
+
+	rowsAffected, err := rows.RowsAffected()
+	if err != nil {
+		return db.MapPQError(err)
+	}
+	if rowsAffected == 0 {
+		return shared_model.ErrNoRecord
+	}
+
 	return nil
 }
