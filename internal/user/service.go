@@ -2,7 +2,7 @@ package user
 
 import (
 	"context"
-	"errors"
+	"fmt"
 	"regexp"
 
 	"github.com/alibekkenny/simpengine/internal/shared/model"
@@ -19,7 +19,7 @@ func NewUserService(r UserRepository) *UserService {
 
 func (s *UserService) Register(ctx context.Context, login, email, password string) (int64, error) {
 	if !isValidLogin(login) {
-		return 0, errors.New("invalid login format")
+		return 0, fmt.Errorf("%w: invalid login format", model.ErrInvalidBody)
 	}
 
 	exists, err := s.repo.ExistsByEmailOrLogin(ctx, email, login)
@@ -27,7 +27,7 @@ func (s *UserService) Register(ctx context.Context, login, email, password strin
 		return 0, err
 	}
 	if exists {
-		return 0, model.ErrEmailOrLoginExists
+		return 0, fmt.Errorf("%w: user with such login or email already exists", model.ErrUniqueViolation)
 	}
 
 	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -41,8 +41,12 @@ func (s *UserService) Register(ctx context.Context, login, email, password strin
 		Password: string(passwordHash),
 		Role:     "admin",
 	}
+	id, err := s.repo.Create(ctx, user)
+	if err != nil {
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
 
-	return s.repo.Create(ctx, user)
+	return id, nil
 }
 
 func isValidLogin(login string) bool {

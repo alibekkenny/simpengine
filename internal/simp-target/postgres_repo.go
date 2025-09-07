@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 )
 
@@ -23,7 +24,7 @@ func (r *PostgresRepository) CreateSimpTarget(ctx context.Context, name, descrip
 
 	err := r.db.QueryRowContext(ctx, stmt, name, description, userID).Scan(&id)
 	if err != nil {
-		return 0, err
+		return 0, db.MapPQError(err)
 	}
 
 	return id, nil
@@ -34,12 +35,12 @@ func (r *PostgresRepository) UpdateSimpTarget(ctx context.Context, id int64, nam
 
 	row, err := r.db.ExecContext(ctx, stmt, name, description, id, userID)
 	if err != nil {
-		return err
+		return db.MapPQError(err)
 	}
 
 	rowsAffected, err := row.RowsAffected()
 	if err != nil {
-		return err
+		return db.MapPQError(err)
 	}
 	if rowsAffected == 0 {
 		return model.ErrNoRecord
@@ -53,12 +54,12 @@ func (r *PostgresRepository) DeleteSimpTarget(ctx context.Context, id int64, use
 
 	row, err := r.db.ExecContext(ctx, stmt, id, userID)
 	if err != nil {
-		return err
+		return db.MapPQError(err)
 	}
 
 	rowsAffected, err := row.RowsAffected()
 	if err != nil {
-		return err
+		return db.MapPQError(err)
 	}
 	if rowsAffected == 0 {
 		return model.ErrNoRecord
@@ -71,7 +72,7 @@ func (r *PostgresRepository) FindAllByUserID(ctx context.Context, userID int64) 
 	stmt := `SELECT id, name, description FROM simp_targets WHERE user_id = $1`
 	result, err := r.db.QueryContext(ctx, stmt, userID)
 	if err != nil {
-		return nil, err
+		return nil, db.MapPQError(err)
 	}
 	defer result.Close()
 
@@ -98,7 +99,7 @@ func (r *PostgresRepository) FindByIDAndUserID(ctx context.Context, id, userID i
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord
 		}
-		return nil, err
+		return nil, db.MapPQError(err)
 	}
 
 	return &target, nil
@@ -110,7 +111,10 @@ func (r *PostgresRepository) FindByID(ctx context.Context, id int64) (*SimpTarge
 
 	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&target.ID, &target.Name, &target.Description)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, model.ErrNoRecord
+		}
+		return nil, db.MapPQError(err)
 	}
 
 	return &target, nil

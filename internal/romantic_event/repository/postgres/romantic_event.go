@@ -20,12 +20,12 @@ func NewRomanticEventRepository(db *sql.DB) RomanticEventRepository {
 }
 
 // CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, simpTargetID, userID int64) (int64, error)
-func (r RomanticEventRepository) CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, simpTargetID, userID int64) (int64, error) {
+func (r RomanticEventRepository) CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, status rmodel.RomanticEventStatus, simpTargetID, userID int64) (int64, error) {
 	var id int64
-	stmt := `INSERT INTO romantic_events(event_date, title, description, simp_target_id, user_id)
-	VALUES($1, $2, $3, $4, $5) RETURNING id`
+	stmt := `INSERT INTO romantic_events(event_date, title, description, status, simp_target_id, user_id)
+	VALUES($1, $2, $3, $4, $5, $6) RETURNING id`
 
-	if err := r.db.QueryRowContext(ctx, stmt, eventDate, title, description, simpTargetID, userID).Scan(&id); err != nil {
+	if err := r.db.QueryRowContext(ctx, stmt, eventDate, title, description, status, simpTargetID, userID).Scan(&id); err != nil {
 		return 0, db.MapPQError(err)
 	}
 
@@ -54,6 +54,48 @@ func (r RomanticEventRepository) UpdateRomanticEvent(ctx context.Context, id int
 	return nil
 }
 
+func (r RomanticEventRepository) UpdateStatusAndToken(ctx context.Context, id int64, userID int64, status rmodel.RomanticEventStatus, token string) error {
+	stmt := `UPDATE romantic_events
+	SET status = $1, token = $2
+	WHERE id = $3 AND user_id = $4`
+
+	rows, err := r.db.ExecContext(ctx, stmt, status, token, id, userID)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return model.ErrNoRecord
+	}
+
+	return nil
+}
+
+func (r RomanticEventRepository) UpdateStatus(ctx context.Context, id int64, userID int64, status rmodel.RomanticEventStatus) error {
+	stmt := `UPDATE romantic_events
+	SET status = $1
+	WHERE id = $2 AND user_id = $3`
+
+	rows, err := r.db.ExecContext(ctx, stmt, status, id, userID)
+	if err != nil {
+		return db.MapPQError(err)
+	}
+
+	rowsAffected, err := rows.RowsAffected()
+	if err != nil {
+		return db.MapPQError(err)
+	}
+	if rowsAffected == 0 {
+		return model.ErrNoRecord
+	}
+
+	return nil
+}
+
 // DeleteRomanticEvent(ctx context.Context, id int64) error
 func (r RomanticEventRepository) DeleteRomanticEvent(ctx context.Context, id int64, userID int64) error {
 	stmt := `DELETE FROM romantic_events
@@ -66,7 +108,7 @@ func (r RomanticEventRepository) DeleteRomanticEvent(ctx context.Context, id int
 
 	rowsAfected, err := rows.RowsAffected()
 	if err != nil {
-		return err
+		return db.MapPQError(err)
 	}
 	if rowsAfected == 0 {
 		return model.ErrNoRecord
@@ -78,13 +120,13 @@ func (r RomanticEventRepository) DeleteRomanticEvent(ctx context.Context, id int
 // FindByIDAndUserID(ctx context.Context, id, userID int64) (*RomanticEvent, error)
 func (r RomanticEventRepository) FindByIDAndUserID(ctx context.Context, id, userID int64) (*rmodel.RomanticEvent, error) {
 	var event rmodel.RomanticEvent
-	stmt := `SELECT id, event_date, title, description, simp_target_id, user_id FROM romantic_events WHERE id = $1 AND user_id = $2`
+	stmt := `SELECT id, event_date, title, description, status, public_token, published_at, simp_target_id, user_id FROM romantic_events WHERE id = $1 AND user_id = $2`
 
-	if err := r.db.QueryRowContext(ctx, stmt, id, userID).Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.SimpTargetID, &event.UserID); err != nil {
+	if err := r.db.QueryRowContext(ctx, stmt, id, userID).Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.Status, &event.PublicToken, &event.PublishedAt, &event.SimpTargetID, &event.UserID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord
 		}
-		return nil, err
+		return nil, db.MapPQError(err)
 	}
 
 	return &event, nil
@@ -92,7 +134,7 @@ func (r RomanticEventRepository) FindByIDAndUserID(ctx context.Context, id, user
 
 // FindAllByUserID(ctx context.Context, userID int64) ([]*RomanticEvent, error)
 func (r RomanticEventRepository) FindAllByUserID(ctx context.Context, userID int64) ([]*rmodel.RomanticEvent, error) {
-	stmt := `SELECT id, event_date, title, description, simp_target_id, user_id FROM romantic_events WHERE user_id = $1`
+	stmt := `SELECT id, event_date, title, description, status, public_token, published_at, simp_target_id, user_id FROM romantic_events WHERE user_id = $1`
 
 	rows, err := r.db.QueryContext(ctx, stmt, userID)
 	if err != nil {
@@ -104,7 +146,7 @@ func (r RomanticEventRepository) FindAllByUserID(ctx context.Context, userID int
 
 	for rows.Next() {
 		var event rmodel.RomanticEvent
-		if err := rows.Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.SimpTargetID, &event.UserID); err != nil {
+		if err := rows.Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.Status, &event.PublicToken, &event.PublishedAt, &event.SimpTargetID, &event.UserID); err != nil {
 			return nil, err
 		}
 

@@ -3,17 +3,23 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 func secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
+		if strings.HasPrefix(r.URL.Path, "/swagger/") {
+			// Swagger UI needs inline styles/scripts
+			w.Header().Set("Content-Security-Policy",
+				"default-src 'self' 'unsafe-inline' 'unsafe-eval' data: fonts.googleapis.com fonts.gstatic.com")
+		} else {
+			w.Header().Set("Content-Security-Policy", "default-src 'self'; style-src 'self' fonts.googleapis.com; font-src fonts.gstatic.com")
 
-		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
-		w.Header().Set("X-Content-Type-Options", "nosniff")
-		w.Header().Set("X-Frame-Options", "deny")
-		w.Header().Set("X-XSS-Protection", "0")
-
+			w.Header().Set("Referrer-Policy", "origin-when-cross-origin")
+			w.Header().Set("X-Content-Type-Options", "nosniff")
+			w.Header().Set("X-Frame-Options", "deny")
+			w.Header().Set("X-XSS-Protection", "0")
+		}
 		next.ServeHTTP(w, r)
 	})
 }

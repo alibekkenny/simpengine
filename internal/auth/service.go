@@ -2,6 +2,9 @@ package auth
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
 
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/alibekkenny/simpengine/internal/user"
@@ -19,12 +22,15 @@ func NewAuthService(r user.UserRepository) *AuthService {
 func (s *AuthService) Login(ctx context.Context, login, password string) (string, error) {
 	user, err := s.repo.FindByLogin(ctx, login)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", fmt.Errorf("%w: user with such login and password not found", model.ErrInvalidCredentials)
+		}
 		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", model.ErrNoRecord
+		return "", fmt.Errorf("%w: user with such login and password not found", model.ErrInvalidCredentials)
 	}
 
 	return GenerateJWT(user.ID, user.Login)

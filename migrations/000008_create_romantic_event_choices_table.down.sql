@@ -1,0 +1,1 @@
+DROP TABLE romantic_event_choices;

@@ -35,7 +35,7 @@ func (s *RomanticEventService) CreateRomanticEvent(ctx context.Context, eventDat
 		return 0, err
 	}
 
-	simpTargetID, err := s.repo.CreateRomanticEvent(ctx, eventDate, title, description, simpTargetID, userID)
+	simpTargetID, err := s.repo.CreateRomanticEvent(ctx, eventDate, title, description, rmodel.StatusDraft, simpTargetID, userID)
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return 0, fmt.Errorf("%w: simp target not found", model.ErrNoRecord)
@@ -56,8 +56,18 @@ func (s *RomanticEventService) UpdateRomanticEvent(ctx context.Context, id int64
 		return err
 	}
 
-	err := s.repo.UpdateRomanticEvent(ctx, id, eventDate, title, description, simpTargetID, userID)
+	event, err := s.repo.FindByIDAndUserID(ctx, id, userID)
 	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	if event.Status != rmodel.StatusDraft {
+		return fmt.Errorf("%w: cannot edit event with status %s", model.ErrInvalidState, event.Status)
+	}
+
+	if err := s.repo.UpdateRomanticEvent(ctx, id, eventDate, title, description, simpTargetID, userID); err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
 		}
@@ -111,6 +121,25 @@ func (s *RomanticEventService) GetRomanticEventByIDAndUserID(ctx context.Context
 	}
 
 	return event, nil
+}
+
+func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int64) (rmodel.RomanticEventStatus, string, error) {
+	userID, ok := auth.GetUserIDFromContext(ctx)
+	if !ok {
+		return "", "", model.ErrInvalidCredentials
+	}
+
+	status := rmodel.StatusPublished
+	token := uuid.New().String()
+
+	if err := s.repo.UpdateStatusAndToken(ctx, id, userID, status, token); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return "", "", fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+		}
+		return "", "", fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return status, token, nil
 }
 
 func (s *RomanticEventService) AddStep(ctx context.Context, title, description string, stepOrder int32, eventID int64) (int64, error) {

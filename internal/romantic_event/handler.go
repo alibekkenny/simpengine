@@ -34,8 +34,7 @@ func (h *RomanticEventHandler) CreateRomanticEvent(w http.ResponseWriter, r *htt
 
 	romanticEventID, err := h.service.CreateRomanticEvent(r.Context(), body.EventDate, body.Title, body.Description, body.SimpTargetID)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -71,8 +70,7 @@ func (h *RomanticEventHandler) UpdateRomanticEvent(w http.ResponseWriter, r *htt
 	}
 
 	if err := h.service.UpdateRomanticEvent(r.Context(), id, body.EventDate, body.Title, body.Description, body.SimpTargetID); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -89,8 +87,7 @@ func (h *RomanticEventHandler) DeleteRomanticEvent(w http.ResponseWriter, r *htt
 	}
 
 	if err := h.service.DeleteRomanticEvent(r.Context(), id); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -108,8 +105,7 @@ func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.
 
 	event, err := h.service.GetRomanticEventByIDAndUserID(r.Context(), id)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -128,13 +124,33 @@ func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.
 func (h *RomanticEventHandler) ViewRomanticEventsByUser(w http.ResponseWriter, r *http.Request) {
 	events, err := h.service.GetRomanticEventsByUserID(r.Context())
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(events)
+}
+
+func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	status, token, err := h.service.PublishRomanticEvent(r.Context(), id)
+	if err != nil {
+		model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"status": status,
+		"token":  token,
+	})
 }
 
 func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Request) {
@@ -158,8 +174,7 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 
 	id, err := h.service.AddStep(r.Context(), body.Title, body.Description, body.StepOrder, eventID)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -199,8 +214,7 @@ func (h *RomanticEventHandler) UpdateEventStep(w http.ResponseWriter, r *http.Re
 	}
 
 	if err := h.service.UpdateStep(r.Context(), id, body.Title, body.Description, body.StepOrder, eventID); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -223,8 +237,7 @@ func (h *RomanticEventHandler) RemoveEventStep(w http.ResponseWriter, r *http.Re
 	}
 
 	if err := h.service.RemoveStep(r.Context(), id, eventID); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -259,8 +272,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 
 	id, err := h.service.AddOption(r.Context(), body.Label, body.ImgID, eventID, stepID)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -306,8 +318,7 @@ func (h *RomanticEventHandler) UpdateStepOption(w http.ResponseWriter, r *http.R
 	}
 
 	if err := h.service.UpdateOption(r.Context(), id, body.Label, body.ImgID, eventID, stepID); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -337,8 +348,7 @@ func (h *RomanticEventHandler) RemoveStepOption(w http.ResponseWriter, r *http.R
 	}
 
 	if err := h.service.RemoveOption(r.Context(), id, eventID, stepID); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 

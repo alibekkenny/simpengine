@@ -19,6 +19,8 @@ type RomanticEventResponseDTO struct {
 	EventDate    time.Time          `json:"event_date"`
 	Title        string             `json:"title"`
 	Description  string             `json:"description"`
+	PublishedAt  time.Time          `json:"published_at"`
+	PublicToken  string             `json:"public_token"`
 	SimpTargetID int64              `json:"simp_target_id"`
 	Steps        []*model.EventStep `json:"steps"`
 }

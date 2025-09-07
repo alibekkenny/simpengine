@@ -6,3 +6,9 @@ type RegisterRequestDTO struct {
 	Password string `json:"password" validate:"required,min=3"`
 	Token    string `json:"token"` //optional (required only for admins)
 }
+
+type RegisterResponseDTO struct {
+	ID    int64  `json:"id"`
+	Login string `json:"login"`
+	Email string `json:"email"`
+}

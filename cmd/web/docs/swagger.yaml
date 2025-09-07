@@ -1,0 +1,324 @@
+definitions:
+  auth.LoginRequestDTO:
+    properties:
+      login:
+        minLength: 3
+        type: string
+      password:
+        minLength: 3
+        type: string
+    required:
+    - login
+    - password
+    type: object
+  auth.LoginResponseDTO:
+    properties:
+      token:
+        type: string
+    type: object
+  model.ErrorResponse:
+    properties:
+      code:
+        example: INVALID_BODY
+        type: string
+      message:
+        example: Invalid request
+        type: string
+    type: object
+  simptarget.CreateSimpTargetResponseDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  simptarget.SimpTarget:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  simptarget.SimpTargetRequestDTO:
+    properties:
+      description:
+        type: string
+      name:
+        minLength: 2
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  user.RegisterRequestDTO:
+    properties:
+      email:
+        type: string
+      login:
+        minLength: 3
+        type: string
+      password:
+        minLength: 3
+        type: string
+      token:
+        description: optional (required only for admins)
+        type: string
+    required:
+    - email
+    - login
+    - password
+    type: object
+  user.RegisterResponseDTO:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      login:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /simp-target:
+    get:
+      description: Views a SimpTargets of current User.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of SimpTargets
+          schema:
+            items:
+              $ref: '#/definitions/simptarget.SimpTarget'
+            type: array
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: View SimpTargets by User
+      tags:
+      - simp_target
+    post:
+      consumes:
+      - application/json
+      description: Creates a simp target by user
+      parameters:
+      - description: Simp target data
+        in: body
+        name: simpTarget
+        required: true
+        schema:
+          $ref: '#/definitions/simptarget.SimpTargetRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/simptarget.CreateSimpTargetResponseDTO'
+        "400":
+          description: Invalid request (invalid ID, invalid body, or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Creates simp target
+      tags:
+      - simp_target
+  /simp-target/{id}:
+    delete:
+      description: Deletes a SimpTarget by its ID. Only allowed if the user has proper
+        permissions.
+      parameters:
+      - description: SimpTarget ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Delete SimpTarget
+      tags:
+      - simp_target
+    get:
+      description: Views a SimpTarget by its ID. Users can only see their simp targets.
+      parameters:
+      - description: SimpTarget ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: SimpTarget
+          schema:
+            $ref: '#/definitions/simptarget.SimpTarget'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: View SimpTarget
+      tags:
+      - simp_target
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing SimpTarget by ID.
+      parameters:
+      - description: SimpTarget ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: SimpTarget data
+        in: body
+        name: simpTarget
+        required: true
+        schema:
+          $ref: '#/definitions/simptarget.SimpTargetRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request (invalid ID, invalid body, or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Update SimpTarget
+      tags:
+      - simp_target
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a goddamn user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/auth.LoginRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/auth.LoginResponseDTO'
+        "400":
+          description: Invalid request (invalid ID, invalid body, or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: User login
+      tags:
+      - user
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Registers a goddamn user
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.RegisterRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/user.RegisterResponseDTO'
+        "400":
+          description: Invalid request (invalid ID, invalid body, or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "409":
+          description: User with such email or login already exists
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Register user
+      tags:
+      - user
+swagger: "2.0"

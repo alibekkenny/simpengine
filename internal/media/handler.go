@@ -34,8 +34,7 @@ func (h *MediaHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
 
 	id, err := h.service.UploadFile(r.Context(), file, header.Filename, header.Size)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 
@@ -55,8 +54,7 @@ func (h *MediaHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 
 	media, object, err := h.service.DownloadFile(r.Context(), id)
 	if err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 	defer object.Close()
@@ -78,8 +76,7 @@ func (h *MediaHandler) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.DeleteFile(r.Context(), id); err != nil {
-		code, msg := model.ErrorStatus(err)
-		http.Error(w, msg, code)
+		model.WriteErrorResponse(w, err)
 		return
 	}
 

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 
+	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 )
 
@@ -23,7 +24,7 @@ func (r *PostgresRepository) Create(ctx context.Context, user *User) (int64, err
 
 	err := r.db.QueryRowContext(ctx, stmt, user.Login, user.Email, user.Password, user.Role).Scan(&id)
 	if err != nil {
-		return 0, err
+		return 0, db.MapPQError(err)
 	}
 
 	return id, nil
@@ -38,7 +39,7 @@ func (r *PostgresRepository) FindById(ctx context.Context, id int64) (*User, err
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord
 		} else {
-			return nil, err
+			return nil, db.MapPQError(err)
 		}
 	}
 
@@ -54,7 +55,7 @@ func (r *PostgresRepository) FindByLogin(ctx context.Context, login string) (*Us
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord
 		} else {
-			return nil, err
+			return nil, db.MapPQError(err)
 		}
 	}
 
@@ -68,7 +69,7 @@ func (r *PostgresRepository) ExistsByEmailOrLogin(ctx context.Context, email, lo
 	)`
 
 	err := r.db.QueryRowContext(ctx, stmt, email, login).Scan(&exists)
-	return exists, err
+	return exists, db.MapPQError(err)
 }
 
 func (r *PostgresRepository) ExistsByID(ctx context.Context, id int64) (bool, error) {
@@ -78,5 +79,5 @@ func (r *PostgresRepository) ExistsByID(ctx context.Context, id int64) (bool, er
 	)`
 
 	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&exists)
-	return exists, err
+	return exists, db.MapPQError(err)
 }

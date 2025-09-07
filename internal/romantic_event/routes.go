@@ -34,6 +34,7 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	mux.Handle("DELETE /romantic-event/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.DeleteRomanticEvent)))
 	mux.Handle("GET /romantic-event/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewRomanticEvent)))
 	mux.Handle("GET /romantic-event", auth.AuthMiddleware(http.HandlerFunc(handler.ViewRomanticEventsByUser)))
+	mux.Handle("POST /romantic-event/{id}/publish", auth.AuthMiddleware(http.HandlerFunc(handler.PublishRomanticEvent)))
 
 	mux.Handle("POST /romantic-event/{event_id}/steps", auth.AuthMiddleware(http.HandlerFunc(handler.AddEventStep)))
 	mux.Handle("PUT /romantic-event/{event_id}/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateEventStep)))

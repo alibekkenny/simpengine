@@ -1,14 +1,21 @@
+// @title SimpEngine API
+// @version 1.0
+// @description API for managing romantic events in SimpEngine project
+// @host localhost:8080
+// @BasePath /
 package main
 
 import (
 	"net/http"
 
+	_ "github.com/alibekkenny/simpengine/cmd/web/docs"
 	"github.com/alibekkenny/simpengine/internal/auth"
 	"github.com/alibekkenny/simpengine/internal/media"
 	romanticevent "github.com/alibekkenny/simpengine/internal/romantic_event"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/alibekkenny/simpengine/internal/user"
 	"github.com/justinas/alice"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func (app *application) routes() http.Handler {
@@ -28,6 +35,8 @@ func (app *application) routes() http.Handler {
 
 	// chain of middleware
 	standardChain := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+
+	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	return standardChain.Then(mux)
 }
