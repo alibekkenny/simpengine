@@ -364,7 +364,7 @@ func (h *RomanticEventHandler) RemoveEventStep(w http.ResponseWriter, r *http.Re
 // @Produce  	json
 // @Param 		event_id  	path int	true	"Romantic event id"
 // @Param 		step_id  	path int	true	"Event step id"
-// @Param 		stepOption 	{object} StepOptionRequestDTO	true	"Step option data"
+// @Param 		stepOption 	body StepOptionRequestDTO	true	"Step option data"
 // @Success 	201 		{object} StepOptionResponseDTO 	true 	"Step option data"
 // @Failure 	400 		{object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
@@ -420,7 +420,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 // @Param 		event_id  	path int	true	"Romantic event id"
 // @Param 		step_id  	path int	true	"Event step id"
 // @Param 		id  		path int	true	"Id"
-// @Param 		stepOption 	{object} StepOptionRequestDTO	true	"Step option data"
+// @Param 		stepOption 	body StepOptionRequestDTO	true	"Step option data"
 // @Success 	204 		"No content"
 // @Failure 	400 		{object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
