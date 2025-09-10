@@ -25,13 +25,31 @@ type RomanticEventResponseDTO struct {
 	Steps        []*model.EventStep `json:"steps"`
 }
 
+type PublishRomanticEventResponseDTO struct {
+	Status model.RomanticEventStatus `json:"status"`
+	Token  string                    `json:"token"`
+}
+
 type EventStepRequestDTO struct {
 	Title       string `json:"title" validate:"required,min=3"`
 	Description string `json:"description" validate:"required"`
 	StepOrder   int32  `json:"step_order" validate:"required"`
 }
 
+type EventStepResponseDTO struct {
+	ID          int64  `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	EventOrder  int32  `json:"event_order"`
+}
+
 type StepOptionRequestDTO struct {
 	Label string    `json:"label" validate:"required,min=3"`
 	ImgID uuid.UUID `json:"img_id" validate:"required"`
+}
+
+type StepOptionResponseDTO struct {
+	ID    int64     `json:"id"`
+	Label string    `json:"label"`
+	ImgID uuid.UUID `json:"img_id"`
 }
