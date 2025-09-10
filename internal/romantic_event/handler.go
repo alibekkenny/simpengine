@@ -365,7 +365,7 @@ func (h *RomanticEventHandler) RemoveEventStep(w http.ResponseWriter, r *http.Re
 // @Param 		event_id  	path int	true	"Romantic event id"
 // @Param 		step_id  	path int	true	"Event step id"
 // @Param 		stepOption 	body StepOptionRequestDTO	true	"Step option data"
-// @Success 	201 		{object} StepOptionResponseDTO 	true 	"Step option data"
+// @Success 	201 		{object} StepOptionResponseDTO "Step option data"
 // @Failure 	400 		{object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Romantic event step not found"
