@@ -31,6 +31,7 @@ func NewRomanticEventHandler(s *RomanticEventService, v *validator.Validate) *Ro
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 {object} model.ErrorResponse "Simp target not found"
 // @Failure 	500 {object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event [post]
 func (h *RomanticEventHandler) CreateRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	var body RomanticEventRequestDTO
@@ -75,6 +76,7 @@ func (h *RomanticEventHandler) CreateRomanticEvent(w http.ResponseWriter, r *htt
 // @Failure 	404 			{object} model.ErrorResponse "Simp target/Romantic event not found"
 // @Failure 	409 			{object} model.ErrorResponse "Cannot edit event with given status"
 // @Failure 	500 			{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event [put]
 func (h *RomanticEventHandler) UpdateRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -113,6 +115,7 @@ func (h *RomanticEventHandler) UpdateRomanticEvent(w http.ResponseWriter, r *htt
 // @Failure      401  {object}  model.ErrorResponse  "Unauthorized"
 // @Failure      404  {object}  model.ErrorResponse  "Not Found"
 // @Failure      500  {object}  model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /romantic-event/{id} [delete]
 func (h *RomanticEventHandler) DeleteRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -141,6 +144,7 @@ func (h *RomanticEventHandler) DeleteRomanticEvent(w http.ResponseWriter, r *htt
 // @Failure      401  {object}  model.ErrorResponse  "Unauthorized"
 // @Failure      404  {object}  model.ErrorResponse  "Not Found"
 // @Failure      500  {object}  model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /romantic-event/{id} [get]
 func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -176,6 +180,7 @@ func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.
 // @Failure   	400		{object}  	model.ErrorResponse  "Invalid ID"
 // @Failure   	401		{object}  	model.ErrorResponse  "Unauthorized"
 // @Failure   	500 	{object}  	model.ErrorResponse  "Internal Server Error"
+// @Security    BearerAuth
 // @Router       /romantic-event [get]
 func (h *RomanticEventHandler) ViewRomanticEventsByUser(w http.ResponseWriter, r *http.Request) {
 	events, err := h.service.GetRomanticEventsByUserID(r.Context())
@@ -200,6 +205,7 @@ func (h *RomanticEventHandler) ViewRomanticEventsByUser(w http.ResponseWriter, r
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 {object} model.ErrorResponse "RomanticEvent not found"
 // @Failure 	500 {object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{id}/publish [post]
 func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -235,6 +241,7 @@ func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *ht
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 {object} model.ErrorResponse "Romantic event not found"
 // @Failure 	500 {object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps [post]
 func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")
@@ -284,6 +291,7 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Event Step not found"
 // @Failure 	500 		{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps/{id} [put]
 func (h *RomanticEventHandler) UpdateEventStep(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")
@@ -332,6 +340,7 @@ func (h *RomanticEventHandler) UpdateEventStep(w http.ResponseWriter, r *http.Re
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Event step not found"
 // @Failure 	500 		{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps/{id} [delete]
 func (h *RomanticEventHandler) RemoveEventStep(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")
@@ -370,6 +379,7 @@ func (h *RomanticEventHandler) RemoveEventStep(w http.ResponseWriter, r *http.Re
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Romantic event step not found"
 // @Failure 	500 		{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps/{step_id}/options [post]
 func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")
@@ -426,6 +436,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Event step/Step option not found"
 // @Failure 	500 		{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps/{step_id}/options/{id} [put]
 func (h *RomanticEventHandler) UpdateStepOption(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")
@@ -482,6 +493,7 @@ func (h *RomanticEventHandler) UpdateStepOption(w http.ResponseWriter, r *http.R
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 		{object} model.ErrorResponse "Romantic event/Event step/Step option not found"
 // @Failure 	500 		{object} model.ErrorResponse "Internal server error"
+// @Security    BearerAuth
 // @Router /romantic-event/{event_id}/steps/{step_id}/options/{id} [delete]
 func (h *RomanticEventHandler) RemoveStepOption(w http.ResponseWriter, r *http.Request) {
 	eventIDStr := r.PathValue("event_id")

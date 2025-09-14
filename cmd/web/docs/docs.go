@@ -15,8 +15,164 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/media": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Uploads a file to the media storage and returns its ID.",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Media"
+                ],
+                "summary": "Upload a media file",
+                "parameters": [
+                    {
+                        "type": "file",
+                        "description": "File to upload",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/media.UploadMediaResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/media/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the file as binary stream (with correct Content-Type and Content-Disposition headers).",
+                "produces": [
+                    "application/octet-stream"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Download media file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes the file by its id. Only media owner can delete it.",
+                "tags": [
+                    "media"
+                ],
+                "summary": "Deletes media file",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Media ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "File not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/romantic-event": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Views a RomanticEvents of current User.",
                 "produces": [
                     "application/json"
@@ -56,6 +212,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Updates an existing RomanticEvent by ID.",
                 "consumes": [
                     "application/json"
@@ -123,6 +284,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Creates romantic event by user",
                 "consumes": [
                     "application/json"
@@ -181,6 +347,11 @@ const docTemplate = `{
         },
         "/romantic-event/{event_id}/steps": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add event step to romantic event. Only Romantic event owner, can add steps to it.",
                 "consumes": [
                     "application/json"
@@ -246,6 +417,11 @@ const docTemplate = `{
         },
         "/romantic-event/{event_id}/steps/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Updates event step of romantic event. Only Romantic event owner, can update step to it.",
                 "consumes": [
                     "application/json"
@@ -313,6 +489,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Removes event step of romantic event. Only Romantic event owner, can update step to it.",
                 "consumes": [
                     "application/json"
@@ -373,6 +554,11 @@ const docTemplate = `{
         },
         "/romantic-event/{event_id}/steps/{step_id}/options": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Add option to romantic event step. Only Romantic event owner, can add option to event step.",
                 "consumes": [
                     "application/json"
@@ -445,6 +631,11 @@ const docTemplate = `{
         },
         "/romantic-event/{event_id}/steps/{step_id}/options/{id}": {
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Update option of romantic event step. Only Romantic event owner, can update event step option.",
                 "consumes": [
                     "application/json"
@@ -519,6 +710,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Remove option of romantic event step. Only Romantic event owner, can remove event step option.",
                 "consumes": [
                     "application/json"
@@ -586,6 +782,11 @@ const docTemplate = `{
         },
         "/romantic-event/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Views a RomanticEvent by its ID. Users can only see their romantic events.",
                 "produces": [
                     "application/json"
@@ -638,6 +839,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Deletes a RomanticEvent by its ID. Only allowed if the user has proper permissions.",
                 "tags": [
                     "romantic_event"
@@ -686,6 +892,11 @@ const docTemplate = `{
         },
         "/romantic-event/{id}/publish": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Creates public token for romantic event and changes it's status to published",
                 "consumes": [
                     "application/json"
@@ -743,6 +954,11 @@ const docTemplate = `{
         },
         "/simp-target": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Views a SimpTargets of current User.",
                 "produces": [
                     "application/json"
@@ -782,6 +998,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Creates a simp target by user",
                 "consumes": [
                     "application/json"
@@ -834,6 +1055,11 @@ const docTemplate = `{
         },
         "/simp-target/{id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Views a SimpTarget by its ID. Users can only see their simp targets.",
                 "produces": [
                     "application/json"
@@ -886,6 +1112,11 @@ const docTemplate = `{
                 }
             },
             "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Updates an existing SimpTarget by ID.",
                 "consumes": [
                     "application/json"
@@ -947,6 +1178,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Deletes a SimpTarget by its ID. Only allowed if the user has proper permissions.",
                 "tags": [
                     "simp_target"
@@ -1121,6 +1357,14 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "media.UploadMediaResponseDTO": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1408,17 +1652,24 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "SimpEngine API",
+	Description:      "API for managing romantic events in SimpEngine project",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

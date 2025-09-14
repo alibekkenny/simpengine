@@ -1,8 +1,3 @@
-// @title SimpEngine API
-// @version 1.0
-// @description API for managing romantic events in SimpEngine project
-// @host localhost:8080
-// @BasePath /
 package main
 
 import (

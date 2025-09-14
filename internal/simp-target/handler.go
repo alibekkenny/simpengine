@@ -30,6 +30,7 @@ func NewSimpTargetHandler(s *SimpTargetService, v *validator.Validate) *SimpTarg
 // @Failure 	400 {object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	500 {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
 // @Router /simp-target [post]
 func (h *SimpTargetHandler) CreateSimpTarget(w http.ResponseWriter, r *http.Request) {
 	var body SimpTargetRequestDTO
@@ -73,6 +74,7 @@ func (h *SimpTargetHandler) CreateSimpTarget(w http.ResponseWriter, r *http.Requ
 // @Failure      401  		{object}  		model.ErrorResponse  "Unauthorized"
 // @Failure      404  		{object}  		model.ErrorResponse  "Not Found"
 // @Failure      500  		{object}  		model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /simp-target/{id} [put]
 func (h *SimpTargetHandler) UpdateSimpTarget(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -114,6 +116,7 @@ func (h *SimpTargetHandler) UpdateSimpTarget(w http.ResponseWriter, r *http.Requ
 // @Failure      401  {object}  model.ErrorResponse  "Unauthorized"
 // @Failure      404  {object}  model.ErrorResponse  "Not Found"
 // @Failure      500  {object}  model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /simp-target/{id} [delete]
 func (h *SimpTargetHandler) DeleteSimpTarget(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -143,6 +146,7 @@ func (h *SimpTargetHandler) DeleteSimpTarget(w http.ResponseWriter, r *http.Requ
 // @Failure      401  {object}  model.ErrorResponse  "Unauthorized"
 // @Failure      404  {object}  model.ErrorResponse  "Not Found"
 // @Failure      500  {object}  model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /simp-target/{id} [get]
 func (h *SimpTargetHandler) ViewSimpTarget(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
@@ -171,6 +175,7 @@ func (h *SimpTargetHandler) ViewSimpTarget(w http.ResponseWriter, r *http.Reques
 // @Failure   	400		{object}  	model.ErrorResponse  "Invalid ID"
 // @Failure   	401		{object}  	model.ErrorResponse  "Unauthorized"
 // @Failure   	500 	{object}  	model.ErrorResponse  "Internal Server Error"
+// @Security     BearerAuth
 // @Router       /simp-target [get]
 func (h *SimpTargetHandler) ViewSimpTargetByUser(w http.ResponseWriter, r *http.Request) {
 	targets, err := h.service.GetSimpTargetsByUserID(r.Context())

@@ -18,6 +18,19 @@ func NewMediaHandler(service *MediaService) *MediaHandler {
 	return &MediaHandler{service: service}
 }
 
+// UploadFile godoc
+// @Summary      Upload a media file
+// @Description  Uploads a file to the media storage and returns its ID.
+// @Tags         Media
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        file  formData  file  true  "File to upload"
+// @Success      201   {object}  UploadMediaResponseDTO
+// @Failure      400   {object}  model.ErrorResponse
+// @Failure      401   {object}  model.ErrorResponse
+// @Failure      500   {object}  model.ErrorResponse
+// @Security     BearerAuth
+// @Router       /media [post]
 func (h *MediaHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
@@ -39,11 +52,23 @@ func (h *MediaHandler) UploadFile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{
-		"id": id,
+	json.NewEncoder(w).Encode(UploadMediaResponseDTO{
+		ID: id,
 	})
 }
 
+// DownloadFile  downloads a media file by ID.
+// @Summary      Download media file
+// @Description  Returns the file as binary stream (with correct Content-Type and Content-Disposition headers).
+// @Tags         media
+// @Param        id   path      int  true  "Media ID"
+// @Produce      application/octet-stream
+// @Success      200  {file}    file
+// @Failure      400  {object}  model.ErrorResponse  "Invalid ID"
+// @Failure      404  {object}  model.ErrorResponse  "File not found"
+// @Failure      500  {object}  model.ErrorResponse  "Internal server error"
+// @Security     BearerAuth
+// @Router       /media/{id} [get]
 func (h *MediaHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -67,6 +92,17 @@ func (h *MediaHandler) DownloadFile(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// DeleteFile  	 deletes a media file by ID.
+// @Summary      Deletes media file
+// @Description  Deletes the file by its id. Only media owner can delete it.
+// @Tags         media
+// @Param        id   path      int  true  "Media ID"
+// @Success      204  "No content"
+// @Failure      400  {object}  model.ErrorResponse  "Invalid ID"
+// @Failure      404  {object}  model.ErrorResponse  "File not found"
+// @Failure      500  {object}  model.ErrorResponse  "Internal server error"
+// @Security     BearerAuth
+// @Router       /media/{id} [delete]
 func (h *MediaHandler) DeleteFile(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)

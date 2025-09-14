@@ -1,3 +1,4 @@
+basePath: /
 definitions:
   auth.LoginRequestDTO:
     properties:
@@ -15,6 +16,11 @@ definitions:
     properties:
       token:
         type: string
+    type: object
+  media.UploadMediaResponseDTO:
+    properties:
+      id:
+        type: integer
     type: object
   model.ErrorResponse:
     properties:
@@ -209,9 +215,110 @@ definitions:
       login:
         type: string
     type: object
+host: localhost:8080
 info:
   contact: {}
+  description: API for managing romantic events in SimpEngine project
+  title: SimpEngine API
+  version: "1.0"
 paths:
+  /media:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Uploads a file to the media storage and returns its ID.
+      parameters:
+      - description: File to upload
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/media.UploadMediaResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Upload a media file
+      tags:
+      - Media
+  /media/{id}:
+    delete:
+      description: Deletes the file by its id. Only media owner can delete it.
+      parameters:
+      - description: Media ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Deletes media file
+      tags:
+      - media
+    get:
+      description: Returns the file as binary stream (with correct Content-Type and
+        Content-Disposition headers).
+      parameters:
+      - description: Media ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/octet-stream
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: File not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Download media file
+      tags:
+      - media
   /romantic-event:
     get:
       description: Views a RomanticEvents of current User.
@@ -236,6 +343,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: View RomanticEvents by User
       tags:
       - romantic_event
@@ -273,6 +382,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Creates romantic event
       tags:
       - romantic_event
@@ -318,6 +429,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Updates romantic event
       tags:
       - romantic_event
@@ -362,6 +475,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Add event step to romantic event
       tags:
       - romantic_event
@@ -403,6 +518,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Remove event step
       tags:
       - romantic_event
@@ -449,6 +566,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update event step
       tags:
       - romantic_event
@@ -498,6 +617,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Add option to event step
       tags:
       - romantic_event
@@ -544,6 +665,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Removes event step option
       tags:
       - romantic_event
@@ -595,6 +718,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update event step option
       tags:
       - romantic_event
@@ -628,6 +753,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete RomanticEvent
       tags:
       - romantic_event
@@ -664,6 +791,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: View RomanticEvent
       tags:
       - simp_target
@@ -703,6 +832,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Publishes romantic event
       tags:
       - romantic_event
@@ -730,6 +861,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: View SimpTargets by User
       tags:
       - simp_target
@@ -763,6 +896,8 @@ paths:
           description: Internal server error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Creates simp target
       tags:
       - simp_target
@@ -796,6 +931,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Delete SimpTarget
       tags:
       - simp_target
@@ -831,6 +968,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: View SimpTarget
       tags:
       - simp_target
@@ -872,6 +1011,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
       summary: Update SimpTarget
       tags:
       - simp_target
@@ -943,4 +1084,9 @@ paths:
       summary: Register user
       tags:
       - user
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
