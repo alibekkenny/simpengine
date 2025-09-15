@@ -29,7 +29,7 @@ func (app *application) routes() http.Handler {
 	mediaModule.RegisterRoutes(mux, app.config)
 
 	// chain of middleware
-	standardChain := alice.New(app.recoverPanic, app.logRequest, secureHeaders)
+	standardChain := alice.New(app.recoverPanic, app.logRequest, app.secureHeaders)
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 

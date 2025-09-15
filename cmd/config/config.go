@@ -11,4 +11,5 @@ type Config struct {
 	DB              *sql.DB
 	MinioClient     *minio.Client
 	MinioBucketName string
+	FrontEndHost    string
 }

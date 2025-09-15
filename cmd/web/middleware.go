@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func secureHeaders(next http.Handler) http.Handler {
+func (app *application) secureHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/swagger/") {
 			// Swagger UI needs inline styles/scripts
@@ -19,6 +19,11 @@ func secureHeaders(next http.Handler) http.Handler {
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "deny")
 			w.Header().Set("X-XSS-Protection", "0")
+
+			// cors for mars
+			w.Header().Set("Access-Control-Allow-Origin", app.config.FrontEndHost)
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 		}
 		next.ServeHTTP(w, r)
 	})

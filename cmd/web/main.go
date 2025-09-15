@@ -37,6 +37,7 @@ func main() {
 	minioBucketName := os.Getenv("MINIO_BUCKET")
 	minioAccesKey := os.Getenv("MINIO_ACCESS_KEY")
 	minioSecretKey := os.Getenv("MINIO_SECRET_KEY")
+	frontEndHost := os.Getenv("FRONTEND_HOST")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -64,6 +65,7 @@ func main() {
 		DB:              db,
 		MinioClient:     minioClient,
 		MinioBucketName: minioBucketName,
+		FrontEndHost:    frontEndHost,
 	}
 
 	app := &application{
