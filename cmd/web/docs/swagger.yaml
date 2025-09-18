@@ -1086,7 +1086,7 @@ paths:
       - user
 securityDefinitions:
   BearerAuth:
-    in: header
-    name: Authorization
+    in: cookie
+    name: jwt
     type: apiKey
 swagger: "2.0"

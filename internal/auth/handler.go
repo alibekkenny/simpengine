@@ -50,6 +50,15 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		Path:     "/",   // makes it available to all routes
+		HttpOnly: true,  // frontend JS cannot read it (good for security)
+		Secure:   false, // true if using HTTPS
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(LoginResponseDTO{
 		Token: token,

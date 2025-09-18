@@ -7,8 +7,8 @@ package main
 // @BasePath        /
 
 // @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
+// @in cookie
+// @name jwt
 
 import (
 	"database/sql"
