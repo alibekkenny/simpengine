@@ -90,6 +90,20 @@ definitions:
     - StatusRejected
     - StatusConfirmed
     - StatusArchived
+  romanticevent.EventStepRequestDTO:
+    properties:
+      description:
+        type: string
+      step_order:
+        type: integer
+      title:
+        minLength: 3
+        type: string
+    required:
+    - description
+    - step_order
+    - title
+    type: object
   romanticevent.EventStepResponseDTO:
     properties:
       description:
@@ -451,7 +465,7 @@ paths:
         name: eventStep
         required: true
         schema:
-          $ref: '#/definitions/romanticevent.RomanticEventRequestDTO'
+          $ref: '#/definitions/romanticevent.EventStepRequestDTO'
       produces:
       - application/json
       responses:
@@ -544,7 +558,7 @@ paths:
         name: eventStep
         required: true
         schema:
-          $ref: '#/definitions/romanticevent.RomanticEventRequestDTO'
+          $ref: '#/definitions/romanticevent.EventStepRequestDTO'
       produces:
       - application/json
       responses:

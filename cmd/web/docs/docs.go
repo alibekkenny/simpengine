@@ -377,7 +377,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/romanticevent.RomanticEventRequestDTO"
+                            "$ref": "#/definitions/romanticevent.EventStepRequestDTO"
                         }
                     }
                 ],
@@ -454,7 +454,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/romanticevent.RomanticEventRequestDTO"
+                            "$ref": "#/definitions/romanticevent.EventStepRequestDTO"
                         }
                     }
                 ],
@@ -1465,6 +1465,26 @@ const docTemplate = `{
                 "StatusConfirmed",
                 "StatusArchived"
             ]
+        },
+        "romanticevent.EventStepRequestDTO": {
+            "type": "object",
+            "required": [
+                "description",
+                "step_order",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "step_order": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
         },
         "romanticevent.EventStepResponseDTO": {
             "type": "object",

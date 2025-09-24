@@ -235,7 +235,7 @@ func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *ht
 // @Accept  	json
 // @Produce  	json
 // @Param 		event_id  path int	true	"Romantic event id"
-// @Param 		eventStep  body	RomanticEventRequestDTO	true	"Event step data"
+// @Param 		eventStep  body	EventStepRequestDTO	true	"Event step data"
 // @Success 	201 {object} EventStepResponseDTO
 // @Failure 	400 {object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
@@ -285,7 +285,7 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 // @Produce  	json
 // @Param 		event_id  	path int	true	"Romantic event id"
 // @Param 		id  		path int	true	"Event step id"
-// @Param 		eventStep  	body	RomanticEventRequestDTO	true	"Event step data"
+// @Param 		eventStep  	body	EventStepRequestDTO	true	"Event step data"
 // @Success 	204 		"No content"
 // @Failure 	400 		{object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 		{object} model.ErrorResponse "Unauthorized (invalid credentials)"
