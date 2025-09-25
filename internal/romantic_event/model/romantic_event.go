@@ -19,8 +19,8 @@ type RomanticEvent struct {
 	Title        string              `json:"title"`
 	Status       RomanticEventStatus `json:"status"`
 	Description  string              `json:"description"`
-	PublicToken  string              `json:"public_token"`
-	PublishedAt  time.Time           `json:"published_at"`
+	PublicToken  *string             `json:"public_token"`
+	PublishedAt  *time.Time          `json:"published_at"`
 	SimpTargetID int64               `json:"simp_target_id"`
 	UserID       int64               `json:"-"`
 	Steps        []*EventStep        `json:"-"`

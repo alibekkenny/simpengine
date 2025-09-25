@@ -136,7 +136,7 @@ func (h *RomanticEventHandler) DeleteRomanticEvent(w http.ResponseWriter, r *htt
 // ViewRomanticEvent views RomanticEvent by ID.
 // @Summary      View RomanticEvent
 // @Description  Views a RomanticEvent by its ID. Users can only see their romantic events.
-// @Tags         simp_target
+// @Tags         romantic_event
 // @Produce      json
 // @Param        id   path      int64  true  "RomanticEvent ID"
 // @Success      200  {object} 	RomanticEventResponseDTO	"RomanticEvent"

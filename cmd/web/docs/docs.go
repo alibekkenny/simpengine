@@ -792,7 +792,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "simp_target"
+                    "romantic_event"
                 ],
                 "summary": "View RomanticEvent",
                 "parameters": [
