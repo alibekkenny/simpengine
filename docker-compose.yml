@@ -17,7 +17,7 @@ services:
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin123
       MINIO_BUCKET: simpengine
-      FRONTEND_HOST: http://192.168.0.106:3000
+      FRONTEND_HOST: http://localhost:3000
     ports:
       - "8080:8080"
 
