@@ -3,8 +3,9 @@ package main
 // @title           SimpEngine API
 // @version         1.0
 // @description     API for managing romantic events in SimpEngine project
-// @host            localhost:8080
+// @host
 // @BasePath        /
+// @schemes https http
 
 // @securityDefinitions.apikey BearerAuth
 // @in cookie

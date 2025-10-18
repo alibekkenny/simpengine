@@ -229,7 +229,6 @@ definitions:
       login:
         type: string
     type: object
-host: localhost:8080
 info:
   contact: {}
   description: API for managing romantic events in SimpEngine project
@@ -1123,6 +1122,9 @@ paths:
       summary: Register user
       tags:
       - user
+schemes:
+- https
+- http
 securityDefinitions:
   BearerAuth:
     in: cookie
