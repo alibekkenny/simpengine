@@ -269,7 +269,7 @@ paths:
       - BearerAuth: []
       summary: Upload a media file
       tags:
-      - Media
+      - media
   /media/{id}:
     delete:
       description: Deletes the file by its id. Only media owner can delete it.

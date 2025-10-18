@@ -30,7 +30,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Media"
+                    "media"
                 ],
                 "summary": "Upload a media file",
                 "parameters": [

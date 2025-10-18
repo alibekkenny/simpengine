@@ -21,7 +21,7 @@ func NewMediaHandler(service *MediaService) *MediaHandler {
 // UploadFile godoc
 // @Summary      Upload a media file
 // @Description  Uploads a file to the media storage and returns its ID.
-// @Tags         Media
+// @Tags         media
 // @Accept       multipart/form-data
 // @Produce      json
 // @Param        file  formData  file  true  "File to upload"
