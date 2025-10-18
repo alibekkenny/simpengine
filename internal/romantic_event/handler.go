@@ -524,3 +524,24 @@ func (h *RomanticEventHandler) RemoveStepOption(w http.ResponseWriter, r *http.R
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// ViewAvailableOptions views available options of user.
+// @Summary      View event options by User
+// @Description  Views all EventOptions of current User.
+// @Tags         romantic_event
+// @Produce 	json
+// @Success		200		{array} 	model.RomanticEvent  "List of EventStepOptions"
+// @Failure   	401		{object}  	model.ErrorResponse  "Unauthorized"
+// @Failure   	500 	{object}  	model.ErrorResponse  "Internal Server Error"
+// @Security    BearerAuth
+// @Router       /romantic-event/options [get]
+func (h *RomanticEventHandler) ViewAvailableOptions(w http.ResponseWriter, r *http.Request) {
+	options, err := h.service.GetAvailableOptions(r.Context())
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(options)
+}

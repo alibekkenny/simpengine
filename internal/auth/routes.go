@@ -21,7 +21,7 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	InitJWT(cfg.JWTSecret)
 
 	validator := validator.New()
-	handler := NewAuthHandler(m.Service, validator)
+	handler := NewAuthHandler(m.Service, validator, cfg)
 
 	mux.HandleFunc("POST /user/login", handler.Login)
 }

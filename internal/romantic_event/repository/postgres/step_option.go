@@ -5,6 +5,7 @@ import (
 	"database/sql"
 
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
+	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/google/uuid"
 	"github.com/lib/pq"
@@ -129,4 +130,34 @@ func (r EventStepOptionRepository) FindAllByEventStepIDs(ctx context.Context, st
 	}
 
 	return optionsByStep, nil
+}
+
+func (r EventStepOptionRepository) FindAllByUserID(ctx context.Context, userID int64) ([]*rmodel.EventStepOption, error) {
+	stmt := `SELECT o.id, o.label, o.img_id, o.event_step_id FROM event_step_options o
+	JOIN event_steps s ON s.id = o.event_step_id
+    JOIN romantic_events e ON e.id = s.event_id
+	WHERE e.user_id = $1`
+
+	rows, err := r.db.QueryContext(ctx, stmt, userID)
+	if err != nil {
+		return nil, db.MapPQError(err)
+	}
+
+	defer rows.Close()
+
+	options := []*rmodel.EventStepOption{}
+	for rows.Next() {
+		var option rmodel.EventStepOption
+		if err := rows.Scan(&option.ID, &option.Label, &option.ImgID, &option.EventStepID); err != nil {
+			return nil, db.MapPQError(err)
+		}
+
+		options = append(options, &option)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, db.MapPQError(err)
+	}
+
+	return options, nil
 }

@@ -851,6 +851,31 @@ paths:
       summary: Publishes romantic event
       tags:
       - romantic_event
+  /romantic-event/options:
+    get:
+      description: Views all EventOptions of current User.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of EventStepOptions
+          schema:
+            items:
+              $ref: '#/definitions/model.RomanticEvent'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: View event options by User
+      tags:
+      - romantic_event
   /simp-target:
     get:
       description: Views a SimpTargets of current User.

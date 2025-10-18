@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/alibekkenny/simpengine/cmd/config"
 	shared_model "github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/go-playground/validator/v10"
 )
@@ -12,10 +13,11 @@ import (
 type AuthHandler struct {
 	service   *AuthService
 	validator *validator.Validate
+	cfg       *config.Config
 }
 
-func NewAuthHandler(s *AuthService, v *validator.Validate) *AuthHandler {
-	return &AuthHandler{service: s, validator: v}
+func NewAuthHandler(s *AuthService, v *validator.Validate, cfg *config.Config) *AuthHandler {
+	return &AuthHandler{service: s, validator: v, cfg: cfg}
 }
 
 // Login authenticates users.
@@ -53,10 +55,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "jwt",
 		Value:    token,
-		Path:     "/",   // makes it available to all routes
-		HttpOnly: true,  // frontend JS cannot read it (good for security)
-		Secure:   false, // true if using HTTPS
-		SameSite: http.SameSiteLaxMode,
+		Path:     "/",                   // makes it available to all routes
+		HttpOnly: true,                  // frontend JS cannot read it (good for security)
+		Secure:   true,                  // required if frontend is HTTPS (which it will be on Vercel)
+		SameSite: http.SameSiteNoneMode, // crucial for cross-site cookies
+		Domain:   h.cfg.FrontEndHost,    // optional, but can help
 	})
 
 	w.WriteHeader(http.StatusOK)

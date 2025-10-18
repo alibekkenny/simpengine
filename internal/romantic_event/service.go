@@ -258,6 +258,20 @@ func (s *RomanticEventService) RemoveOption(ctx context.Context, id int64, event
 	return nil
 }
 
+func (s *RomanticEventService) GetAvailableOptions(ctx context.Context) ([]*rmodel.EventStepOption, error) {
+	userID, ok := auth.GetUserIDFromContext(ctx)
+	if !ok {
+		return nil, model.ErrInvalidCredentials
+	}
+
+	options, err := s.optionRepo.FindAllByUserID(ctx, userID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return options, nil
+}
+
 func (s *RomanticEventService) ensureEventOwnership(ctx context.Context, eventID int64) (int64, error) {
 	userID, ok := auth.GetUserIDFromContext(ctx)
 	if !ok {
