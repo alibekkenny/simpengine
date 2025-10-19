@@ -19,8 +19,8 @@ func (app *application) routes() http.Handler {
 	userModule := user.NewModule(app.config.DB)
 	authModule := auth.NewModule(userModule.Repo)
 	simpTargetModule := simptarget.NewModule(app.config.DB)
-	romanticEventModule := romanticevent.NewModule(app.config.DB, simpTargetModule.Service)
 	mediaModule := media.NewModule(app.config.DB, app.config.MinioClient, app.config.MinioBucketName)
+	romanticEventModule := romanticevent.NewModule(app.config.DB, simpTargetModule.Service, mediaModule.Service)
 
 	userModule.RegisterRoutes(mux, app.config)
 	authModule.RegisterRoutes(mux, app.config)

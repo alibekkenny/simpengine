@@ -39,7 +39,7 @@ func (s *UserService) Register(ctx context.Context, login, email, password strin
 		Login:    login,
 		Email:    email,
 		Password: string(passwordHash),
-		Role:     "admin",
+		Role:     string(RoleUser),
 	}
 	id, err := s.repo.Create(ctx, user)
 	if err != nil {

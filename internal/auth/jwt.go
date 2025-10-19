@@ -13,7 +13,7 @@ func InitJWT(secret []byte) {
 	jwtSecret = secret
 }
 
-func GenerateJWT(userId int64, login string) (string, error) {
+func GenerateJWT(userId int64, login string, role string) (string, error) {
 	if jwtSecret == nil {
 		return "", errors.New("JWT secret not initialized")
 	}
@@ -21,6 +21,7 @@ func GenerateJWT(userId int64, login string) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userId,
 		"login":   login,
+		"role":    role,
 		"exp":     time.Now().Add(time.Hour * 72).Unix(),
 		"iat":     time.Now().Unix(),
 	}

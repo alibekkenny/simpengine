@@ -51,7 +51,7 @@ definitions:
       id:
         type: integer
       img_id:
-        type: string
+        type: integer
       label:
         type: string
     type: object
@@ -156,7 +156,7 @@ definitions:
   romanticevent.StepOptionRequestDTO:
     properties:
       img_id:
-        type: string
+        type: integer
       label:
         minLength: 3
         type: string
@@ -169,8 +169,41 @@ definitions:
       id:
         type: integer
       img_id:
-        type: string
+        type: integer
       label:
+        type: string
+    type: object
+  romanticevent.TemplateEventStepRequestDTO:
+    properties:
+      description:
+        type: string
+      title:
+        minLength: 3
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  romanticevent.TemplateEventStepResponseDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    type: object
+  romanticevent.ViewTemplateEventStepResponseDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/romanticevent.StepOptionResponseDTO'
+        type: array
+      title:
         type: string
     type: object
   simptarget.CreateSimpTargetResponseDTO:
@@ -235,6 +268,199 @@ info:
   title: SimpEngine API
   version: "1.0"
 paths:
+  /admin/romantic-event/template-steps:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new template event step (admin only). Template steps
+        serve as base reusable steps for romantic events.
+      parameters:
+      - description: Template event step data
+        in: body
+        name: step
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.TemplateEventStepRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/romanticevent.TemplateEventStepResponseDTO'
+        "400":
+          description: Invalid request (invalid body or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden (insufficient privileges)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create template event step
+      tags:
+      - admin_romantic_event
+  /admin/romantic-event/template-steps/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing template event step by ID (admin only).
+      parameters:
+      - description: Template event step ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated template event step data
+        in: body
+        name: step
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.TemplateEventStepRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request (invalid ID or body)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden (insufficient privileges)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Template event step not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update template event step
+      tags:
+      - admin_romantic_event
+  /admin/romantic-event/template-steps/{id}/options:
+    post:
+      consumes:
+      - application/json
+      description: Adds an option to an existing template event step (admin only).
+      parameters:
+      - description: Template event step ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Step option data
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.StepOptionRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/romanticevent.StepOptionResponseDTO'
+        "400":
+          description: Invalid request (invalid ID or body)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden (insufficient privileges)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Template event step not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Add option to template event step
+      tags:
+      - admin_romantic_event
+  /admin/romantic-event/template-steps/{step_id}/options/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing option of a template event step (admin only).
+      parameters:
+      - description: Template event step ID
+        format: int64
+        in: path
+        name: step_id
+        required: true
+        type: integer
+      - description: Step option ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated option data
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.StepOptionRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request (invalid ID or body)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "403":
+          description: Forbidden (insufficient privileges)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Template event step or option not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update template event step option
+      tags:
+      - admin_romantic_event
   /media:
     post:
       consumes:
@@ -873,6 +1099,74 @@ paths:
       security:
       - BearerAuth: []
       summary: View event options by User
+      tags:
+      - romantic_event
+  /romantic-event/template-steps:
+    get:
+      consumes:
+      - application/json
+      description: Returns a list of all template event steps available for creating
+        romantic events.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/romanticevent.TemplateEventStepResponseDTO'
+            type: array
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get all template event steps
+      tags:
+      - romantic_event
+  /romantic-event/template-steps/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Returns details of a template event step with all its options.
+      parameters:
+      - description: Template event step ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/romanticevent.ViewTemplateEventStepResponseDTO'
+        "400":
+          description: Invalid request (invalid ID)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Template event step not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get template event step by ID
       tags:
       - romantic_event
   /simp-target:

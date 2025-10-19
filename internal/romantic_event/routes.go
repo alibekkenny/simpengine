@@ -6,6 +6,7 @@ import (
 
 	"github.com/alibekkenny/simpengine/cmd/config"
 	"github.com/alibekkenny/simpengine/internal/auth"
+	"github.com/alibekkenny/simpengine/internal/media"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository/postgres"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/go-playground/validator/v10"
@@ -15,12 +16,12 @@ type Module struct {
 	Service *RomanticEventService
 }
 
-func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService) *Module {
+func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService, mediaService *media.MediaService) *Module {
 	eventRepo := postgres.NewRomanticEventRepository(db)
 	stepRepo := postgres.NewEventStepRepository(db)
 	optionRepo := postgres.NewEventStepOptionRepository(db)
 
-	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService)
+	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService, mediaService)
 
 	return &Module{Service: service}
 }
@@ -44,5 +45,17 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	mux.Handle("PUT /romantic-event/{event_id}/steps/{step_id}/options/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateStepOption)))
 	mux.Handle("DELETE /romantic-event/{event_id}/steps/{step_id}/options/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.RemoveStepOption)))
 
-	mux.Handle("GET /romantic-event/options", auth.AuthMiddleware(http.HandlerFunc(handler.ViewAvailableOptions)))
+	//mux.Handle("GET /romantic-event/template-steps/options", auth.AuthMiddleware(http.HandlerFunc(handler.ViewAvailableOptions)))
+
+	mux.Handle("POST /admin/romantic-event/template-steps",
+		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.AddTemplateEventStep))))
+	mux.Handle("PUT /admin/romantic-event/template-steps/{id}",
+		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.UpdateTemplateEventStep))))
+	mux.Handle("POST /admin/romantic-event/template-steps/{id}/options",
+		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.AddTemplateEventStepOption))))
+	mux.Handle("PUT /admin/romantic-event/template-steps/{step_id}/options/{id}",
+		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.UpdateTemplateEventStepOption))))
+
+	mux.Handle("GET /romantic-event/template-steps", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventSteps)))
+	mux.Handle("GET /romantic-event/template-steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventStep)))
 }

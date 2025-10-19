@@ -6,6 +6,7 @@ import (
 	"errors"
 
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
+	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 )
 
@@ -110,4 +111,77 @@ func (r EventStepRepository) FindByIDandEventID(ctx context.Context, id, eventID
 	}
 
 	return &step, nil
+}
+
+func (r EventStepRepository) CreateTemplateEventStep(ctx context.Context, title, description string) (int64, error) {
+	var id int64
+	stmt := `INSERT INTO event_steps(title, description)
+	VALUES($1, $2) RETURNING id`
+
+	if err := r.db.QueryRowContext(ctx, stmt, title, description).Scan(&id); err != nil {
+		return 0, db.MapPQError(err)
+	}
+
+	return id, nil
+}
+
+func (r EventStepRepository) UpdateTemplateEventStep(ctx context.Context, id int64, title, description string) error {
+	stmt := `UPDATE event_steps SET title = $1, description = $2 WHERE id = $3`
+
+	rows, err := r.db.ExecContext(ctx, stmt, title, description, id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := rows.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return model.ErrNoRecord
+	}
+
+	return nil
+}
+
+func (r EventStepRepository) FindByID(ctx context.Context, id int64) (*rmodel.EventStep, error) {
+	var step rmodel.EventStep
+	stmt := `SELECT id, title, description FROM event_steps 
+	WHERE id = $1 AND event_id IS NULL`
+
+	if err := r.db.QueryRowContext(ctx, stmt, id).Scan(&step.ID, &step.Title, &step.Description); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, model.ErrNoRecord
+		}
+		return nil, err
+	}
+
+	return &step, nil
+}
+
+func (r EventStepRepository) FindAllTemplates(ctx context.Context) ([]*rmodel.EventStep, error) {
+	stmt := `SELECT id, title, description FROM event_steps WHERE event_id IS NULL`
+
+	rows, err := r.db.QueryContext(ctx, stmt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	steps := []*rmodel.EventStep{}
+
+	for rows.Next() {
+		var step rmodel.EventStep
+		if err := rows.Scan(&step.ID, &step.Title, &step.Description); err != nil {
+			return nil, err
+		}
+
+		steps = append(steps, &step)
+	}
+
+	if rows.Err() != nil {
+		return nil, err
+	}
+
+	return steps, nil
 }

@@ -11,6 +11,7 @@ var ErrNoRecord = errors.New("no matching record found")
 var ErrEmailOrLoginExists = errors.New("user with such email or login already exists")
 var ErrInvalidBody = errors.New("invalid body")
 var ErrInvalidCredentials = errors.New("invalid credentials")
+var ErrForbidden = errors.New("forbidden")
 var ErrInternal = errors.New("internal server error")
 var ErrUniqueViolation = errors.New("unique constraint violation")
 var ErrInvalidState = errors.New("invalid state")
@@ -26,6 +27,8 @@ func ErrorStatus(err error) (int, string, string) {
 		return http.StatusBadRequest, "INVALID_PARAMETERS", err.Error()
 	case errors.Is(err, ErrInvalidCredentials):
 		return http.StatusUnauthorized, "INVALID_CREDENTIALS", err.Error()
+	case errors.Is(err, ErrForbidden):
+		return http.StatusForbidden, "FORBIDDEN", err.Error()
 	case errors.Is(err, ErrNoRecord):
 		return http.StatusNotFound, "NOT_FOUND", err.Error()
 	case errors.Is(err, ErrUniqueViolation):

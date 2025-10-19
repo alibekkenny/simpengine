@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/alibekkenny/simpengine/internal/auth"
+	"github.com/alibekkenny/simpengine/internal/media"
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
@@ -19,10 +20,11 @@ type RomanticEventService struct {
 	stepRepo          repository.EventStepRepository
 	optionRepo        repository.EventStepOptionRepository
 	simpTargetService *simptarget.SimpTargetService
+	mediaService      *media.MediaService
 }
 
-func NewRomanticEventService(repo repository.RomaticEventRepository, stepRepo repository.EventStepRepository, optionRepo repository.EventStepOptionRepository, simpTargetService *simptarget.SimpTargetService) *RomanticEventService {
-	return &RomanticEventService{repo: repo, stepRepo: stepRepo, optionRepo: optionRepo, simpTargetService: simpTargetService}
+func NewRomanticEventService(repo repository.RomaticEventRepository, stepRepo repository.EventStepRepository, optionRepo repository.EventStepOptionRepository, simpTargetService *simptarget.SimpTargetService, mediaService *media.MediaService) *RomanticEventService {
+	return &RomanticEventService{repo: repo, stepRepo: stepRepo, optionRepo: optionRepo, simpTargetService: simpTargetService, mediaService: mediaService}
 }
 
 func (s *RomanticEventService) CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, simpTargetID int64) (int64, error) {
@@ -188,7 +190,7 @@ func (s *RomanticEventService) RemoveStep(ctx context.Context, id int64, eventID
 	return nil
 }
 
-func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgID uuid.UUID, eventID int64, eventStepID int64) (int64, error) {
+func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgID int64, eventID int64, eventStepID int64) (int64, error) {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return 0, err
@@ -202,6 +204,13 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
+	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+		}
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
 	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
 	if err != nil {
 		return 0, err
@@ -210,7 +219,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 	return id, nil
 }
 
-func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label string, imgID uuid.UUID, eventID int64, eventStepID int64) error {
+func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label string, imgID int64, eventID int64, eventStepID int64) error {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return err
@@ -220,6 +229,13 @@ func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return fmt.Errorf("%w: event step not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: image not found", model.ErrNoRecord)
 		}
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
@@ -270,6 +286,107 @@ func (s *RomanticEventService) GetAvailableOptions(ctx context.Context) ([]*rmod
 	}
 
 	return options, nil
+}
+
+func (s *RomanticEventService) AddTemplateEventStep(ctx context.Context, title, description string) (int64, error) {
+	id, err := s.stepRepo.CreateTemplateEventStep(ctx, title, description)
+	if err != nil {
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return id, nil
+}
+
+func (s *RomanticEventService) UpdateTemplateEventStep(ctx context.Context, id int64, title, description string, eventID int64) error {
+	if err := s.stepRepo.UpdateTemplateEventStep(ctx, id, title, description); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: event step not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return nil
+}
+
+func (s *RomanticEventService) GetTemplateEventSteps(ctx context.Context) ([]*rmodel.EventStep, error) {
+	steps, err := s.stepRepo.FindAllTemplates(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.attachOptions(ctx, steps); err != nil {
+		return nil, err
+	}
+
+	return steps, nil
+}
+
+func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label string, imgID int64, eventStepID int64) (int64, error) {
+	_, err := s.stepRepo.FindByID(ctx, eventStepID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return 0, fmt.Errorf("%w: template event step not found", model.ErrNoRecord)
+		}
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+		}
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
+}
+
+func (s *RomanticEventService) UpdateTemplateOption(ctx context.Context, id int64, label string, imgID int64, stepID int64) error {
+	_, err := s.stepRepo.FindByID(ctx, stepID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: template event step not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: image not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: template option not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return nil
+}
+
+func (s *RomanticEventService) GetTemplateEventStep(ctx context.Context, id int64) (*rmodel.EventStep, error) {
+	step, err := s.stepRepo.FindByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return nil, fmt.Errorf("%w: template event step not found", model.ErrNoRecord)
+		}
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	options, err := s.optionRepo.FindAllByEventStepID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	step.Options = options
+
+	return step, nil
 }
 
 func (s *RomanticEventService) ensureEventOwnership(ctx context.Context, eventID int64) (int64, error) {

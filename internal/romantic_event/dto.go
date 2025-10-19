@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/alibekkenny/simpengine/internal/romantic_event/model"
-	"github.com/google/uuid"
 )
 
 type RomanticEventRequestDTO struct {
@@ -44,12 +43,30 @@ type EventStepResponseDTO struct {
 }
 
 type StepOptionRequestDTO struct {
-	Label string    `json:"label" validate:"required,min=3"`
-	ImgID uuid.UUID `json:"img_id" validate:"required"`
+	Label string `json:"label" validate:"required,min=3"`
+	ImgID int64  `json:"img_id" validate:"required"`
 }
 
 type StepOptionResponseDTO struct {
-	ID    int64     `json:"id"`
-	Label string    `json:"label"`
-	ImgID uuid.UUID `json:"img_id"`
+	ID    int64  `json:"id"`
+	Label string `json:"label"`
+	ImgID int64  `json:"img_id"`
+}
+
+type TemplateEventStepRequestDTO struct {
+	Title       string `json:"title" validate:"required,min=3"`
+	Description string `json:"description" validate:"required"`
+}
+
+type TemplateEventStepResponseDTO struct {
+	ID          int64  `json:"id"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+}
+
+type ViewTemplateEventStepResponseDTO struct {
+	ID          int64                    `json:"id"`
+	Title       string                   `json:"title"`
+	Description string                   `json:"description"`
+	Options     []*StepOptionResponseDTO `json:"options"`
 }

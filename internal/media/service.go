@@ -96,3 +96,21 @@ func (s *MediaService) DeleteFile(ctx context.Context, id int64) error {
 
 	return nil
 }
+
+func (s *MediaService) CheckIfExists(ctx context.Context, id int64) error {
+	userID, ok := auth.GetUserIDFromContext(ctx)
+	if !ok {
+		return model.ErrInvalidCredentials
+	}
+
+	_, err := s.mediaRepo.FindByIDAndUserID(ctx, id, userID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: file not found", model.ErrNoRecord)
+		}
+
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return nil
+}

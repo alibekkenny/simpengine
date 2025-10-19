@@ -545,3 +545,245 @@ func (h *RomanticEventHandler) ViewAvailableOptions(w http.ResponseWriter, r *ht
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(options)
 }
+
+// AddTemplateEventStep creates a new template event step.
+// @Summary      Create template event step
+// @Description  Creates a new template event step (admin only). Template steps serve as base reusable steps for romantic events.
+// @Tags         admin_romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        step  body     TemplateEventStepRequestDTO  true  "Template event step data"
+// @Success      201   {object} TemplateEventStepResponseDTO
+// @Failure      400   {object} model.ErrorResponse "Invalid request (invalid body or validation error)"
+// @Failure      401   {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      403   {object} model.ErrorResponse "Forbidden (insufficient privileges)"
+// @Failure      500   {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /admin/romantic-event/template-steps [post]
+func (h *RomanticEventHandler) AddTemplateEventStep(w http.ResponseWriter, r *http.Request) {
+	var body TemplateEventStepRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
+		return
+	}
+
+	if err := h.validator.Struct(body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+		return
+	}
+
+	id, err := h.service.AddTemplateEventStep(r.Context(), body.Title, body.Description)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(TemplateEventStepResponseDTO{
+		ID:          id,
+		Title:       body.Title,
+		Description: body.Description,
+	})
+}
+
+// UpdateTemplateEventStep updates an existing template event step.
+// @Summary      Update template event step
+// @Description  Updates an existing template event step by ID (admin only).
+// @Tags         admin_romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        id    path     int64                         true  "Template event step ID"
+// @Param        step  body     TemplateEventStepRequestDTO    true  "Updated template event step data"
+// @Success      204   "No content"
+// @Failure      400   {object} model.ErrorResponse "Invalid request (invalid ID or body)"
+// @Failure      401   {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      403   {object} model.ErrorResponse "Forbidden (insufficient privileges)"
+// @Failure      404   {object} model.ErrorResponse "Template event step not found"
+// @Failure      500   {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /admin/romantic-event/template-steps/{id} [put]
+func (h *RomanticEventHandler) UpdateTemplateEventStep(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	var body TemplateEventStepRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
+		return
+	}
+
+	if err := h.validator.Struct(body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+		return
+	}
+
+	if err := h.service.UpdateTemplateEventStep(r.Context(), id, body.Title, body.Description, id); err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// AddTemplateEventStepOption adds an option to a template event step.
+// @Summary      Add option to template event step
+// @Description  Adds an option to an existing template event step (admin only).
+// @Tags         admin_romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        id        path     int64                 true  "Template event step ID"
+// @Param        option    body     StepOptionRequestDTO  true  "Step option data"
+// @Success      201       {object} StepOptionResponseDTO
+// @Failure      400       {object} model.ErrorResponse "Invalid request (invalid ID or body)"
+// @Failure      401       {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      403       {object} model.ErrorResponse "Forbidden (insufficient privileges)"
+// @Failure      404       {object} model.ErrorResponse "Template event step not found"
+// @Failure      500       {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /admin/romantic-event/template-steps/{id}/options [post]
+func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter, r *http.Request) {
+	eventStepIDStr := r.PathValue("id")
+	eventStepID, err := strconv.ParseInt(eventStepIDStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	var body StepOptionRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
+		return
+	}
+
+	if err := h.validator.Struct(body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+		return
+	}
+
+	id, err := h.service.AddTemplateOption(r.Context(), body.Label, body.ImgID, eventStepID)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(StepOptionResponseDTO{
+		ID:    id,
+		Label: body.Label,
+		ImgID: body.ImgID,
+	})
+}
+
+// UpdateTemplateEventStepOption updates a template event step option.
+// @Summary      Update template event step option
+// @Description  Updates an existing option of a template event step (admin only).
+// @Tags         admin_romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        step_id  path     int64                 true  "Template event step ID"
+// @Param        id       path     int64                 true  "Step option ID"
+// @Param        option   body     StepOptionRequestDTO  true  "Updated option data"
+// @Success      204      "No content"
+// @Failure      400      {object} model.ErrorResponse "Invalid request (invalid ID or body)"
+// @Failure      401      {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      403      {object} model.ErrorResponse "Forbidden (insufficient privileges)"
+// @Failure      404      {object} model.ErrorResponse "Template event step or option not found"
+// @Failure      500      {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /admin/romantic-event/template-steps/{step_id}/options/{id} [put]
+func (h *RomanticEventHandler) UpdateTemplateEventStepOption(w http.ResponseWriter, r *http.Request) {
+	stepIDStr := r.PathValue("step_id")
+	stepID, err := strconv.ParseInt(stepIDStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid step_id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	var body StepOptionRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
+		return
+	}
+
+	if err := h.validator.Struct(body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+		return
+	}
+
+	if err := h.service.UpdateTemplateOption(r.Context(), id, body.Label, body.ImgID, stepID); err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// ViewTemplateEventSteps returns all template event steps.
+// @Summary      Get all template event steps
+// @Description  Returns a list of all template event steps available for creating romantic events.
+// @Tags         romantic_event
+// @Accept       json
+// @Produce      json
+// @Success      200  {array}  TemplateEventStepResponseDTO
+// @Failure      401  {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      500  {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /romantic-event/template-steps [get]
+func (h *RomanticEventHandler) ViewTemplateEventSteps(w http.ResponseWriter, r *http.Request) {
+	steps, err := h.service.GetTemplateEventSteps(r.Context())
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(mapTemplateStepsToDTO(steps))
+}
+
+// ViewTemplateEventStep returns a specific template event step by ID.
+// @Summary      Get template event step by ID
+// @Description  Returns details of a template event step with all its options.
+// @Tags         romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        id  path  int64  true  "Template event step ID"
+// @Success      200  {object} ViewTemplateEventStepResponseDTO
+// @Failure      400  {object} model.ErrorResponse "Invalid request (invalid ID)"
+// @Failure      401  {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      404  {object} model.ErrorResponse "Template event step not found"
+// @Failure      500  {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /romantic-event/template-steps/{id} [get]
+func (h *RomanticEventHandler) ViewTemplateEventStep(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	step, err := h.service.GetTemplateEventStep(r.Context(), id)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(ViewTemplateEventStepResponseDTO{
+		ID:          id,
+		Title:       step.Title,
+		Description: step.Description,
+		Options:     mapTemplateOptionsToDTO(step.Options),
+	})
+}

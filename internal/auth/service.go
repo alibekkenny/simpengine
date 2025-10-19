@@ -32,7 +32,7 @@ func (s *AuthService) Login(ctx context.Context, login, password string) (string
 		return "", fmt.Errorf("%w: user with such login and password not found", model.ErrInvalidCredentials)
 	}
 
-	return GenerateJWT(foundUser.ID, foundUser.Login)
+	return GenerateJWT(foundUser.ID, foundUser.Login, foundUser.Role)
 }
 
 func (s *AuthService) Exists(ctx context.Context, id int64) (bool, error) {

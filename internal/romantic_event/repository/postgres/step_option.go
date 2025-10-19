@@ -7,7 +7,6 @@ import (
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
-	"github.com/google/uuid"
 	"github.com/lib/pq"
 )
 
@@ -19,7 +18,7 @@ func NewEventStepOptionRepository(db *sql.DB) EventStepOptionRepository {
 	return EventStepOptionRepository{db: db}
 }
 
-func (r EventStepOptionRepository) CreateEventStepOption(ctx context.Context, label string, imgID uuid.UUID, eventStepID int64) (int64, error) {
+func (r EventStepOptionRepository) CreateEventStepOption(ctx context.Context, label string, imgID int64, eventStepID int64) (int64, error) {
 	var id int64
 	stmt := `INSERT INTO event_step_options(label, img_id, event_step_id)
 	VALUES($1, $2, $3) RETURNING id`
@@ -31,7 +30,7 @@ func (r EventStepOptionRepository) CreateEventStepOption(ctx context.Context, la
 	return id, nil
 }
 
-func (r EventStepOptionRepository) UpdateEventStepOption(ctx context.Context, id int64, label string, imgID uuid.UUID) error {
+func (r EventStepOptionRepository) UpdateEventStepOption(ctx context.Context, id int64, label string, imgID int64) error {
 	stmt := `UPDATE event_step_options
 	SET label = $1, img_id = $2
 	WHERE id = $3`
