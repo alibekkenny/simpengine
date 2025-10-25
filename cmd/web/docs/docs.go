@@ -641,7 +641,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/romantic-event/options": {
+        "/romantic-event/steps/options": {
             "get": {
                 "security": [
                     {
@@ -662,7 +662,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/model.RomanticEvent"
+                                "$ref": "#/definitions/romanticevent.ViewTemplateEventStepResponseDTO"
                             }
                         }
                     },
@@ -1911,12 +1911,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "description",
+                "options",
                 "step_order",
                 "title"
             ],
             "properties": {
                 "description": {
                     "type": "string"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.StepOptionRequestDTO"
+                    }
                 },
                 "step_order": {
                     "type": "integer"
@@ -1933,10 +1940,16 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "event_order": {
+                "id": {
                     "type": "integer"
                 },
-                "id": {
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.StepOptionResponseDTO"
+                    }
+                },
+                "step_order": {
                     "type": "integer"
                 },
                 "title": {

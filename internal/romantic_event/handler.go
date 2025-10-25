@@ -270,10 +270,24 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
+		options := []*rmodel.EventStepOption{}
+		for _, option := range step.Options {
+			if err := h.validator.Struct(option); err != nil {
+				shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+				return
+			}
+
+			options = append(options, &rmodel.EventStepOption{
+				Label: option.Label,
+				ImgID: option.ImgID,
+			})
+		}
+
 		steps = append(steps, rmodel.EventStep{
 			Title:       step.Title,
 			Description: step.Description,
 			StepOrder:   step.StepOrder,
+			Options:     options,
 		})
 	}
 
@@ -285,10 +299,21 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 
 	createdStepsDTO := []EventStepResponseDTO{}
 	for _, step := range createdSteps {
+		createdOptionsDTO := []StepOptionResponseDTO{}
+		for _, option := range step.Options {
+			createdOptionsDTO = append(createdOptionsDTO, StepOptionResponseDTO{
+				ID:    option.ID,
+				Label: option.Label,
+				ImgID: option.ImgID,
+			})
+		}
+
 		createdStepsDTO = append(createdStepsDTO, EventStepResponseDTO{
 			ID:          step.ID,
 			Title:       step.Title,
 			Description: step.Description,
+			Options:     createdOptionsDTO,
+			StepOrder:   step.StepOrder,
 		})
 	}
 
@@ -551,11 +576,11 @@ func (h *RomanticEventHandler) RemoveStepOption(w http.ResponseWriter, r *http.R
 // @Description  Views all EventOptions of current User.
 // @Tags         romantic_event
 // @Produce 	json
-// @Success		200		{array} 	model.RomanticEvent  "List of EventStepOptions"
+// @Success		200		{array} 	ViewTemplateEventStepResponseDTO  "List of EventStepOptions"
 // @Failure   	401		{object}  	model.ErrorResponse  "Unauthorized"
 // @Failure   	500 	{object}  	model.ErrorResponse  "Internal Server Error"
 // @Security    BearerAuth
-// @Router       /romantic-event/options [get]
+// @Router       /romantic-event/steps/options [get]
 func (h *RomanticEventHandler) ViewAvailableOptions(w http.ResponseWriter, r *http.Request) {
 	options, err := h.service.GetAvailableOptions(r.Context())
 	if err != nil {

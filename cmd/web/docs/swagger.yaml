@@ -94,6 +94,10 @@ definitions:
     properties:
       description:
         type: string
+      options:
+        items:
+          $ref: '#/definitions/romanticevent.StepOptionRequestDTO'
+        type: array
       step_order:
         type: integer
       title:
@@ -101,6 +105,7 @@ definitions:
         type: string
     required:
     - description
+    - options
     - step_order
     - title
     type: object
@@ -108,9 +113,13 @@ definitions:
     properties:
       description:
         type: string
-      event_order:
-        type: integer
       id:
+        type: integer
+      options:
+        items:
+          $ref: '#/definitions/romanticevent.StepOptionResponseDTO'
+        type: array
+      step_order:
         type: integer
       title:
         type: string
@@ -1092,7 +1101,7 @@ paths:
       summary: Publishes romantic event
       tags:
       - romantic_event
-  /romantic-event/options:
+  /romantic-event/steps/options:
     get:
       description: Views all EventOptions of current User.
       produces:
@@ -1102,7 +1111,7 @@ paths:
           description: List of EventStepOptions
           schema:
             items:
-              $ref: '#/definitions/model.RomanticEvent'
+              $ref: '#/definitions/romanticevent.ViewTemplateEventStepResponseDTO'
             type: array
         "401":
           description: Unauthorized

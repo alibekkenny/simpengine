@@ -157,6 +157,21 @@ func (s *RomanticEventService) AddSteps(ctx context.Context, steps []rmodel.Even
 		}
 
 		steps[i].ID = id
+		for iOption, option := range step.Options {
+			if err := s.mediaService.CheckIfExists(ctx, option.ImgID); err != nil {
+				if errors.Is(err, model.ErrNoRecord) {
+					return nil, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+				}
+				return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+			}
+
+			optionID, err := s.optionRepo.CreateEventStepOption(ctx, option.Label, option.ImgID, id)
+			if err != nil {
+				return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+			}
+
+			step.Options[iOption].ID = optionID
+		}
 	}
 
 	return steps, nil
@@ -217,7 +232,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 
 	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
 	return id, nil

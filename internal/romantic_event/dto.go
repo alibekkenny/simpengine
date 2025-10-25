@@ -30,9 +30,10 @@ type PublishRomanticEventResponseDTO struct {
 }
 
 type EventStepRequestDTO struct {
-	Title       string `json:"title" validate:"required,min=3"`
-	Description string `json:"description" validate:"required"`
-	StepOrder   int32  `json:"step_order" validate:"required"`
+	Title       string                 `json:"title" validate:"required,min=3"`
+	Description string                 `json:"description" validate:"required"`
+	StepOrder   int32                  `json:"step_order" validate:"required"`
+	Options     []StepOptionRequestDTO `json:"options" validate:"required"`
 }
 
 type EventStepsRequestDTO struct {
@@ -40,10 +41,11 @@ type EventStepsRequestDTO struct {
 }
 
 type EventStepResponseDTO struct {
-	ID          int64  `json:"id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	EventOrder  int32  `json:"event_order"`
+	ID          int64                   `json:"id"`
+	Title       string                  `json:"title"`
+	Description string                  `json:"description"`
+	StepOrder   int32                   `json:"step_order"`
+	Options     []StepOptionResponseDTO `json:"options"`
 }
 
 type EventStepsResponseDTO struct {
