@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	shared_model "github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/go-playground/validator/v10"
 )
@@ -235,8 +236,8 @@ func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *ht
 // @Accept  	json
 // @Produce  	json
 // @Param 		event_id  path int	true	"Romantic event id"
-// @Param 		eventStep  body	EventStepRequestDTO	true	"Event step data"
-// @Success 	201 {object} EventStepResponseDTO
+// @Param 		eventStep  body	EventStepsRequestDTO	true	"Event step data"
+// @Success 	201 {object} EventStepsResponseDTO
 // @Failure 	400 {object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 {object} model.ErrorResponse "Romantic event not found"
@@ -251,7 +252,7 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	var body EventStepRequestDTO
+	var body EventStepsRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
 		return
@@ -262,18 +263,38 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	id, err := h.service.AddStep(r.Context(), body.Title, body.Description, body.StepOrder, eventID)
+	steps := []rmodel.EventStep{}
+	for _, step := range body.Steps {
+		if err := h.validator.Struct(step); err != nil {
+			shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+			return
+		}
+
+		steps = append(steps, rmodel.EventStep{
+			Title:       step.Title,
+			Description: step.Description,
+			StepOrder:   step.StepOrder,
+		})
+	}
+
+	createdSteps, err := h.service.AddSteps(r.Context(), steps, eventID)
 	if err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
 	}
 
+	createdStepsDTO := []EventStepResponseDTO{}
+	for _, step := range createdSteps {
+		createdStepsDTO = append(createdStepsDTO, EventStepResponseDTO{
+			ID:          step.ID,
+			Title:       step.Title,
+			Description: step.Description,
+		})
+	}
+
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(EventStepResponseDTO{
-		ID:          id,
-		Title:       body.Title,
-		Description: body.Description,
-		EventOrder:  body.StepOrder,
+	json.NewEncoder(w).Encode(EventStepsResponseDTO{
+		Steps: createdStepsDTO,
 	})
 }
 

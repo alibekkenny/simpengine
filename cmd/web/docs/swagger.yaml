@@ -115,6 +115,22 @@ definitions:
       title:
         type: string
     type: object
+  romanticevent.EventStepsRequestDTO:
+    properties:
+      steps:
+        items:
+          $ref: '#/definitions/romanticevent.EventStepRequestDTO'
+        type: array
+    required:
+    - steps
+    type: object
+  romanticevent.EventStepsResponseDTO:
+    properties:
+      steps:
+        items:
+          $ref: '#/definitions/romanticevent.EventStepResponseDTO'
+        type: array
+    type: object
   romanticevent.RomanticEventRequestDTO:
     properties:
       description:
@@ -690,14 +706,14 @@ paths:
         name: eventStep
         required: true
         schema:
-          $ref: '#/definitions/romanticevent.EventStepRequestDTO'
+          $ref: '#/definitions/romanticevent.EventStepsRequestDTO'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/romanticevent.EventStepResponseDTO'
+            $ref: '#/definitions/romanticevent.EventStepsResponseDTO'
         "400":
           description: Invalid request (invalid ID, invalid body, or validation error)
           schema:

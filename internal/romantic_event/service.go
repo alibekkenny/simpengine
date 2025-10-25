@@ -144,18 +144,22 @@ func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int6
 	return status, token, nil
 }
 
-func (s *RomanticEventService) AddStep(ctx context.Context, title, description string, stepOrder int32, eventID int64) (int64, error) {
+func (s *RomanticEventService) AddSteps(ctx context.Context, steps []rmodel.EventStep, eventID int64) ([]rmodel.EventStep, error) {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	id, err := s.stepRepo.CreateEventStep(ctx, title, description, stepOrder, eventID)
-	if err != nil {
-		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	for i, step := range steps {
+		id, err := s.stepRepo.CreateEventStep(ctx, step.Title, step.Description, step.StepOrder, eventID)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+		}
+
+		steps[i].ID = id
 	}
 
-	return id, nil
+	return steps, nil
 }
 
 func (s *RomanticEventService) UpdateStep(ctx context.Context, id int64, title, description string, stepOrder int32, eventID int64) error {

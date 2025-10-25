@@ -35,11 +35,19 @@ type EventStepRequestDTO struct {
 	StepOrder   int32  `json:"step_order" validate:"required"`
 }
 
+type EventStepsRequestDTO struct {
+	Steps []EventStepRequestDTO `json:"steps" validate:"required"`
+}
+
 type EventStepResponseDTO struct {
 	ID          int64  `json:"id"`
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	EventOrder  int32  `json:"event_order"`
+}
+
+type EventStepsResponseDTO struct {
+	Steps []EventStepResponseDTO `json:"steps"`
 }
 
 type StepOptionRequestDTO struct {

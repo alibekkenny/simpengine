@@ -818,7 +818,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/romanticevent.EventStepRequestDTO"
+                            "$ref": "#/definitions/romanticevent.EventStepsRequestDTO"
                         }
                     }
                 ],
@@ -826,7 +826,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/romanticevent.EventStepResponseDTO"
+                            "$ref": "#/definitions/romanticevent.EventStepsResponseDTO"
                         }
                     },
                     "400": {
@@ -1941,6 +1941,31 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "romanticevent.EventStepsRequestDTO": {
+            "type": "object",
+            "required": [
+                "steps"
+            ],
+            "properties": {
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.EventStepRequestDTO"
+                    }
+                }
+            }
+        },
+        "romanticevent.EventStepsResponseDTO": {
+            "type": "object",
+            "properties": {
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.EventStepResponseDTO"
+                    }
                 }
             }
         },
