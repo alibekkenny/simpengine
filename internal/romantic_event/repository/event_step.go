@@ -16,4 +16,5 @@ type EventStepRepository interface {
 	UpdateTemplateEventStep(ctx context.Context, id int64, title, description string) error
 	FindByID(ctx context.Context, id int64) (*model.EventStep, error)
 	FindAllTemplates(ctx context.Context) ([]*model.EventStep, error)
+	CreateEventStepMany(ctx context.Context, steps []*model.EventStep, eventID int64) ([]*model.EventStep, error)
 }

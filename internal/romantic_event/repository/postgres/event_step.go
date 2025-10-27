@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"strings"
 
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/shared/db"
@@ -184,4 +186,46 @@ func (r EventStepRepository) FindAllTemplates(ctx context.Context) ([]*rmodel.Ev
 	}
 
 	return steps, nil
+}
+
+func (r EventStepRepository) CreateEventStepMany(ctx context.Context, steps []*rmodel.EventStep, eventID int64) ([]*rmodel.EventStep, error) {
+	stmt := `INSERT INTO event_steps(title, description, step_order, event_id)
+			VALUES %s
+			RETURNING id, title, description, step_order, event_id`
+
+	var (
+		values []string
+		args   []interface{}
+	)
+	argIndex := 1
+
+	for _, step := range steps {
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d)", argIndex, argIndex+1, argIndex+2, argIndex+3))
+		args = append(args, step.Title, step.Description, step.StepOrder, eventID)
+
+		argIndex += 4
+	}
+
+	query := fmt.Sprintf(stmt, strings.Join(values, ","))
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, db.MapPQError(err)
+	}
+	defer rows.Close()
+
+	created := []*rmodel.EventStep{}
+	for rows.Next() {
+		var s rmodel.EventStep
+		if err := rows.Scan(&s.ID, &s.Title, &s.Description, &s.StepOrder, &s.EventID); err != nil {
+			return nil, db.MapPQError(err)
+		}
+
+		created = append(created, &s)
+	}
+
+	if rows.Err() != nil {
+		return nil, db.MapPQError(rows.Err())
+	}
+
+	return created, nil
 }

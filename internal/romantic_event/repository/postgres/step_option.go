@@ -3,6 +3,8 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/shared/db"
@@ -159,4 +161,47 @@ func (r EventStepOptionRepository) FindAllByUserID(ctx context.Context, userID i
 	}
 
 	return options, nil
+}
+
+func (r EventStepOptionRepository) CreateEventStepOptionMany(ctx context.Context, options []*rmodel.EventStepOption, stepID int64) ([]*rmodel.EventStepOption, error) {
+	stmt := `INSERT INTO event_step_options(label, img_id, event_step_id)
+			VALUES %s
+			RETURNING id, label, img_id, event_step_id`
+
+	var (
+		values []string
+		args   []interface{}
+	)
+
+	argIndex := 1
+	for _, option := range options {
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d)", argIndex, argIndex+1, argIndex+2))
+		args = append(args, option.Label, option.ImgID, stepID)
+
+		argIndex += 3
+	}
+
+	query := fmt.Sprintf(stmt, strings.Join(values, ","))
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, db.MapPQError(err)
+	}
+
+	defer rows.Close()
+
+	created := []*rmodel.EventStepOption{}
+	for rows.Next() {
+		o := rmodel.EventStepOption{}
+		if err := rows.Scan(&o.ID, &o.Label, &o.ImgID, &o.EventStepID); err != nil {
+			return nil, db.MapPQError(err)
+		}
+
+		created = append(created, &o)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, db.MapPQError(err)
+	}
+
+	return created, nil
 }

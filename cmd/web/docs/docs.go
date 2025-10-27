@@ -1971,7 +1971,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "description",
-                "options",
                 "step_order",
                 "title"
             ],

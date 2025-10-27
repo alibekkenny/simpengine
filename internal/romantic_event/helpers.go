@@ -28,3 +28,56 @@ func mapTemplateOptionsToDTO(options []*model.EventStepOption) []*StepOptionResp
 
 	return dtoOptions
 }
+
+func mapDTOToSteps(dtoSteps []EventStepRequestDTO) []*model.EventStep {
+	steps := []*model.EventStep{}
+	for _, dtoStep := range dtoSteps {
+		steps = append(steps, &model.EventStep{
+			Title:       dtoStep.Title,
+			Description: dtoStep.Description,
+			StepOrder:   dtoStep.StepOrder,
+			Options:     mapDTOToOptions(dtoStep.Options),
+		})
+	}
+
+	return steps
+}
+
+func mapStepsToDTO(steps []*model.EventStep) []EventStepResponseDTO {
+	dtoSteps := []EventStepResponseDTO{}
+	for _, step := range steps {
+		dtoSteps = append(dtoSteps, EventStepResponseDTO{
+			ID:        step.ID,
+			Title:     step.Title,
+			StepOrder: step.StepOrder,
+			Options:   mapOptionsToDTO(step.Options),
+		})
+	}
+
+	return dtoSteps
+}
+
+func mapDTOToOptions(dtoOptions []StepOptionRequestDTO) []*model.EventStepOption {
+	options := []*model.EventStepOption{}
+	for _, dtoOption := range dtoOptions {
+		options = append(options, &model.EventStepOption{
+			Label: dtoOption.Label,
+			ImgID: dtoOption.ImgID,
+		})
+	}
+
+	return options
+}
+
+func mapOptionsToDTO(options []*model.EventStepOption) []StepOptionResponseDTO {
+	dtoOptions := []StepOptionResponseDTO{}
+	for _, option := range options {
+		dtoOptions = append(dtoOptions, StepOptionResponseDTO{
+			ID:    option.ID,
+			Label: option.Label,
+			ImgID: option.ImgID,
+		})
+	}
+
+	return dtoOptions
+}

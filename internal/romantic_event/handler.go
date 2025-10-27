@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	shared_model "github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/go-playground/validator/v10"
 )
@@ -263,63 +262,17 @@ func (h *RomanticEventHandler) AddEventStep(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	steps := []rmodel.EventStep{}
-	for _, step := range body.Steps {
-		if err := h.validator.Struct(step); err != nil {
-			shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
-			return
-		}
-
-		options := []*rmodel.EventStepOption{}
-		for _, option := range step.Options {
-			if err := h.validator.Struct(option); err != nil {
-				shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
-				return
-			}
-
-			options = append(options, &rmodel.EventStepOption{
-				Label: option.Label,
-				ImgID: option.ImgID,
-			})
-		}
-
-		steps = append(steps, rmodel.EventStep{
-			Title:       step.Title,
-			Description: step.Description,
-			StepOrder:   step.StepOrder,
-			Options:     options,
-		})
-	}
-
+	steps := mapDTOToSteps(body.Steps)
 	createdSteps, err := h.service.AddSteps(r.Context(), steps, eventID)
 	if err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
 	}
 
-	createdStepsDTO := []EventStepResponseDTO{}
-	for _, step := range createdSteps {
-		createdOptionsDTO := []StepOptionResponseDTO{}
-		for _, option := range step.Options {
-			createdOptionsDTO = append(createdOptionsDTO, StepOptionResponseDTO{
-				ID:    option.ID,
-				Label: option.Label,
-				ImgID: option.ImgID,
-			})
-		}
-
-		createdStepsDTO = append(createdStepsDTO, EventStepResponseDTO{
-			ID:          step.ID,
-			Title:       step.Title,
-			Description: step.Description,
-			Options:     createdOptionsDTO,
-			StepOrder:   step.StepOrder,
-		})
-	}
-
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(EventStepsResponseDTO{
-		Steps: createdStepsDTO,
+		Steps: mapStepsToDTO(createdSteps),
 	})
 }
 

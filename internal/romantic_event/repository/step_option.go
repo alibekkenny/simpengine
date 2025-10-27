@@ -13,4 +13,5 @@ type EventStepOptionRepository interface {
 	FindAllByEventStepID(ctx context.Context, stepID int64) ([]*model.EventStepOption, error)
 	FindAllByEventStepIDs(ctx context.Context, stepIDs []int64) (map[int64][]*model.EventStepOption, error)
 	FindAllByUserID(ctx context.Context, userID int64) ([]*model.EventStepOption, error)
+	CreateEventStepOptionMany(ctx context.Context, options []*model.EventStepOption, stepID int64) ([]*model.EventStepOption, error)
 }

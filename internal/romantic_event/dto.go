@@ -33,11 +33,11 @@ type EventStepRequestDTO struct {
 	Title       string                 `json:"title" validate:"required,min=3"`
 	Description string                 `json:"description" validate:"required"`
 	StepOrder   int32                  `json:"step_order" validate:"required"`
-	Options     []StepOptionRequestDTO `json:"options" validate:"required"`
+	Options     []StepOptionRequestDTO `json:"options" validate:"dive"`
 }
 
 type EventStepsRequestDTO struct {
-	Steps []EventStepRequestDTO `json:"steps" validate:"required"`
+	Steps []EventStepRequestDTO `json:"steps" validate:"required,dive"`
 }
 
 type EventStepResponseDTO struct {

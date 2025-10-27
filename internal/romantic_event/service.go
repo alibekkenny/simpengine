@@ -144,37 +144,30 @@ func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int6
 	return status, token, nil
 }
 
-func (s *RomanticEventService) AddSteps(ctx context.Context, steps []rmodel.EventStep, eventID int64) ([]rmodel.EventStep, error) {
-	_, err := s.ensureEventOwnership(ctx, eventID)
-	if err != nil {
+func (s *RomanticEventService) AddSteps(ctx context.Context, steps []*rmodel.EventStep, eventID int64) ([]*rmodel.EventStep, error) {
+	if len(steps) == 0 {
+		return nil, fmt.Errorf("%w: no steps provided", model.ErrInvalidBody)
+	}
+
+	if _, err := s.ensureEventOwnership(ctx, eventID); err != nil {
 		return nil, err
 	}
 
+	createdSteps, err := s.stepRepo.CreateEventStepMany(ctx, steps, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
 	for i, step := range steps {
-		id, err := s.stepRepo.CreateEventStep(ctx, step.Title, step.Description, step.StepOrder, eventID)
+		o, err := s.optionRepo.CreateEventStepOptionMany(ctx, step.Options, createdSteps[i].ID)
 		if err != nil {
 			return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
 		}
 
-		steps[i].ID = id
-		for iOption, option := range step.Options {
-			if err := s.mediaService.CheckIfExists(ctx, option.ImgID); err != nil {
-				if errors.Is(err, model.ErrNoRecord) {
-					return nil, fmt.Errorf("%w: image not found", model.ErrNoRecord)
-				}
-				return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
-			}
-
-			optionID, err := s.optionRepo.CreateEventStepOption(ctx, option.Label, option.ImgID, id)
-			if err != nil {
-				return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
-			}
-
-			step.Options[iOption].ID = optionID
-		}
+		createdSteps[i].Options = o
 	}
 
-	return steps, nil
+	return createdSteps, nil
 }
 
 func (s *RomanticEventService) UpdateStep(ctx context.Context, id int64, title, description string, stepOrder int32, eventID int64) error {
