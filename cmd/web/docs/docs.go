@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/admin/romantic-event/template-steps": {
+        "/admin/template-event/steps": {
             "post": {
                 "security": [
                     {
@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/romantic-event/template-steps/{id}": {
+        "/admin/template-event/steps/{id}": {
             "put": {
                 "security": [
                     {
@@ -152,7 +152,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/romantic-event/template-steps/{id}/options": {
+        "/admin/template-event/steps/{id}/options": {
             "post": {
                 "security": [
                     {
@@ -229,7 +229,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/romantic-event/template-steps/{step_id}/options/{id}": {
+        "/admin/template-event/steps/{step_id}/options/{id}": {
             "put": {
                 "security": [
                     {
@@ -681,14 +681,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/romantic-event/template-steps": {
+        "/romantic-event/{event_id}/steps": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns a list of all template event steps available for creating romantic events.",
+                "description": "Returns steps of event with all its options.",
                 "consumes": [
                     "application/json"
                 ],
@@ -698,56 +698,13 @@ const docTemplate = `{
                 "tags": [
                     "romantic_event"
                 ],
-                "summary": "Get all template event steps",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/romanticevent.TemplateEventStepResponseDTO"
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized (invalid credentials)",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error",
-                        "schema": {
-                            "$ref": "#/definitions/model.ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/romantic-event/template-steps/{id}": {
-            "get": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Returns details of a template event step with all its options.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "romantic_event"
-                ],
-                "summary": "Get template event step by ID",
+                "summary": "Get event steps by event ID",
                 "parameters": [
                     {
                         "type": "integer",
                         "format": "int64",
-                        "description": "Template event step ID",
-                        "name": "id",
+                        "description": "Romantic event ID",
+                        "name": "event_id",
                         "in": "path",
                         "required": true
                     }
@@ -772,7 +729,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Template event step not found",
+                        "description": "Template event not found",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }
@@ -784,9 +741,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/romantic-event/{event_id}/steps": {
+            },
             "post": {
                 "security": [
                     {
@@ -1663,6 +1618,111 @@ const docTemplate = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/template-event/steps": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns a list of all template event steps available for creating romantic events.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "romantic_event"
+                ],
+                "summary": "Get all template event steps",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/romanticevent.TemplateEventStepResponseDTO"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (invalid credentials)",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/template-event/steps/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns details of a template event step with all its options.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "romantic_event"
+                ],
+                "summary": "Get template event step by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Template event step ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/romanticevent.ViewTemplateEventStepResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request (invalid ID)",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized (invalid credentials)",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Template event step not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
                         "schema": {
                             "$ref": "#/definitions/model.ErrorResponse"
                         }

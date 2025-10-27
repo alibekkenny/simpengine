@@ -408,6 +408,24 @@ func (s *RomanticEventService) GetTemplateEventStep(ctx context.Context, id int6
 	return step, nil
 }
 
+func (s *RomanticEventService) GetEventSteps(ctx context.Context, eventID int64) ([]*rmodel.EventStep, error) {
+	_, err := s.ensureEventOwnership(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+
+	steps, err := s.stepRepo.FindAllByEventID(ctx, eventID)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.attachOptions(ctx, steps); err != nil {
+		return nil, err
+	}
+
+	return steps, nil
+}
+
 func (s *RomanticEventService) ensureEventOwnership(ctx context.Context, eventID int64) (int64, error) {
 	userID, ok := auth.GetUserIDFromContext(ctx)
 	if !ok {

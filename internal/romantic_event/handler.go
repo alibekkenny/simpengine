@@ -605,7 +605,7 @@ func (h *RomanticEventHandler) ViewAvailableOptions(w http.ResponseWriter, r *ht
 // @Failure      403   {object} model.ErrorResponse "Forbidden (insufficient privileges)"
 // @Failure      500   {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /admin/romantic-event/template-steps [post]
+// @Router       /admin/template-event/steps [post]
 func (h *RomanticEventHandler) AddTemplateEventStep(w http.ResponseWriter, r *http.Request) {
 	var body TemplateEventStepRequestDTO
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -647,7 +647,7 @@ func (h *RomanticEventHandler) AddTemplateEventStep(w http.ResponseWriter, r *ht
 // @Failure      404   {object} model.ErrorResponse "Template event step not found"
 // @Failure      500   {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /admin/romantic-event/template-steps/{id} [put]
+// @Router       /admin/template-event/steps/{id} [put]
 func (h *RomanticEventHandler) UpdateTemplateEventStep(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -690,7 +690,7 @@ func (h *RomanticEventHandler) UpdateTemplateEventStep(w http.ResponseWriter, r 
 // @Failure      404       {object} model.ErrorResponse "Template event step not found"
 // @Failure      500       {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /admin/romantic-event/template-steps/{id}/options [post]
+// @Router       /admin/template-event/steps/{id}/options [post]
 func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter, r *http.Request) {
 	eventStepIDStr := r.PathValue("id")
 	eventStepID, err := strconv.ParseInt(eventStepIDStr, 10, 64)
@@ -740,7 +740,7 @@ func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter,
 // @Failure      404      {object} model.ErrorResponse "Template event step or option not found"
 // @Failure      500      {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /admin/romantic-event/template-steps/{step_id}/options/{id} [put]
+// @Router       /admin/template-event/steps/{step_id}/options/{id} [put]
 func (h *RomanticEventHandler) UpdateTemplateEventStepOption(w http.ResponseWriter, r *http.Request) {
 	stepIDStr := r.PathValue("step_id")
 	stepID, err := strconv.ParseInt(stepIDStr, 10, 64)
@@ -785,7 +785,7 @@ func (h *RomanticEventHandler) UpdateTemplateEventStepOption(w http.ResponseWrit
 // @Failure      401  {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure      500  {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /romantic-event/template-steps [get]
+// @Router       /template-event/steps [get]
 func (h *RomanticEventHandler) ViewTemplateEventSteps(w http.ResponseWriter, r *http.Request) {
 	steps, err := h.service.GetTemplateEventSteps(r.Context())
 	if err != nil {
@@ -810,7 +810,7 @@ func (h *RomanticEventHandler) ViewTemplateEventSteps(w http.ResponseWriter, r *
 // @Failure      404  {object} model.ErrorResponse "Template event step not found"
 // @Failure      500  {object} model.ErrorResponse "Internal server error"
 // @Security     BearerAuth
-// @Router       /romantic-event/template-steps/{id} [get]
+// @Router       /template-event/steps/{id} [get]
 func (h *RomanticEventHandler) ViewTemplateEventStep(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -832,4 +832,36 @@ func (h *RomanticEventHandler) ViewTemplateEventStep(w http.ResponseWriter, r *h
 		Description: step.Description,
 		Options:     mapTemplateOptionsToDTO(step.Options),
 	})
+}
+
+// ViewEventSteps returns steps by event ID.
+// @Summary      Get event steps by event ID
+// @Description  Returns steps of event with all its options.
+// @Tags         romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        event_id  path  int64  true  "Romantic event ID"
+// @Success      200  {object} ViewTemplateEventStepResponseDTO
+// @Failure      400  {object} model.ErrorResponse "Invalid request (invalid ID)"
+// @Failure      401  {object} model.ErrorResponse "Unauthorized (invalid credentials)"
+// @Failure      404  {object} model.ErrorResponse "Template event not found"
+// @Failure      500  {object} model.ErrorResponse "Internal server error"
+// @Security     BearerAuth
+// @Router       /romantic-event/{event_id}/steps [get]
+func (h *RomanticEventHandler) ViewEventSteps(w http.ResponseWriter, r *http.Request) {
+	eventIDStr := r.PathValue("event_id")
+	eventID, err := strconv.ParseInt(eventIDStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	steps, err := h.service.GetEventSteps(r.Context(), eventID)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(steps)
 }

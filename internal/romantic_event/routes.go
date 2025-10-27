@@ -37,6 +37,7 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	mux.Handle("GET /romantic-event", auth.AuthMiddleware(http.HandlerFunc(handler.ViewRomanticEventsByUser)))
 	mux.Handle("POST /romantic-event/{id}/publish", auth.AuthMiddleware(http.HandlerFunc(handler.PublishRomanticEvent)))
 
+	mux.Handle("GET /romantic-event/{event_id}/steps", auth.AuthMiddleware(http.HandlerFunc(handler.ViewEventSteps)))
 	mux.Handle("POST /romantic-event/{event_id}/steps", auth.AuthMiddleware(http.HandlerFunc(handler.AddEventStep)))
 	mux.Handle("PUT /romantic-event/{event_id}/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.UpdateEventStep)))
 	mux.Handle("DELETE /romantic-event/{event_id}/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.RemoveEventStep)))
@@ -47,15 +48,16 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 
 	mux.Handle("GET /romantic-event/steps/options", auth.AuthMiddleware(http.HandlerFunc(handler.ViewAvailableOptions)))
 
-	mux.Handle("POST /admin/romantic-event/template-steps",
+	mux.Handle("POST /admin/template-event/steps",
 		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.AddTemplateEventStep))))
-	mux.Handle("PUT /admin/romantic-event/template-steps/{id}",
+	mux.Handle("PUT /admin/template-event/steps/{id}",
 		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.UpdateTemplateEventStep))))
-	mux.Handle("POST /admin/romantic-event/template-steps/{id}/options",
+	mux.Handle("POST /admin/template-event/steps/{id}/options",
 		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.AddTemplateEventStepOption))))
-	mux.Handle("PUT /admin/romantic-event/template-steps/{step_id}/options/{id}",
+	mux.Handle("PUT /admin/template-event/steps/{step_id}/options/{id}",
 		auth.AuthMiddleware(auth.RoleMiddleware("admin")(http.HandlerFunc(handler.UpdateTemplateEventStepOption))))
 
-	mux.Handle("GET /romantic-event/template-steps", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventSteps)))
-	mux.Handle("GET /romantic-event/template-steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventStep)))
+	mux.Handle("GET /template-event/steps", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventSteps)))
+	mux.Handle("GET /template-event/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventStep)))
+
 }
