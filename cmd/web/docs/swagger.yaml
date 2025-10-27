@@ -650,53 +650,6 @@ paths:
       summary: Creates romantic event
       tags:
       - romantic_event
-    put:
-      consumes:
-      - application/json
-      description: Updates an existing RomanticEvent by ID.
-      parameters:
-      - description: Romantic event data
-        in: body
-        name: romanticEvent
-        required: true
-        schema:
-          $ref: '#/definitions/romanticevent.RomanticEventRequestDTO'
-      - description: Romantic event id
-        format: int64
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-        "400":
-          description: Invalid request (invalid ID, invalid body, or validation error)
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "401":
-          description: Unauthorized (invalid credentials)
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "404":
-          description: Simp target/Romantic event not found
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "409":
-          description: Cannot edit event with given status
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/model.ErrorResponse'
-      security:
-      - BearerAuth: []
-      summary: Updates romantic event
-      tags:
-      - romantic_event
   /romantic-event/{event_id}/steps:
     get:
       consumes:
@@ -1096,6 +1049,53 @@ paths:
       security:
       - BearerAuth: []
       summary: View RomanticEvent
+      tags:
+      - romantic_event
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing RomanticEvent by ID.
+      parameters:
+      - description: Romantic event data
+        in: body
+        name: romanticEvent
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.RomanticEventRequestDTO'
+      - description: Romantic event id
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid request (invalid ID, invalid body, or validation error)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized (invalid credentials)
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Simp target/Romantic event not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "409":
+          description: Cannot edit event with given status
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Updates romantic event
       tags:
       - romantic_event
   /romantic-event/{id}/publish:

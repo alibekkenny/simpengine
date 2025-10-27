@@ -77,7 +77,7 @@ func (h *RomanticEventHandler) CreateRomanticEvent(w http.ResponseWriter, r *htt
 // @Failure 	409 			{object} model.ErrorResponse "Cannot edit event with given status"
 // @Failure 	500 			{object} model.ErrorResponse "Internal server error"
 // @Security    BearerAuth
-// @Router /romantic-event [put]
+// @Router /romantic-event/{id} [put]
 func (h *RomanticEventHandler) UpdateRomanticEvent(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
