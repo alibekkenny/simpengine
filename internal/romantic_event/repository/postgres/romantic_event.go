@@ -56,7 +56,7 @@ func (r RomanticEventRepository) UpdateRomanticEvent(ctx context.Context, id int
 
 func (r RomanticEventRepository) UpdateStatusAndToken(ctx context.Context, id int64, userID int64, status rmodel.RomanticEventStatus, token string) error {
 	stmt := `UPDATE romantic_events
-	SET status = $1, token = $2
+	SET status = $1, public_token = $2
 	WHERE id = $3 AND user_id = $4`
 
 	rows, err := r.db.ExecContext(ctx, stmt, status, token, id, userID)
@@ -158,4 +158,18 @@ func (r RomanticEventRepository) FindAllByUserID(ctx context.Context, userID int
 	}
 
 	return events, nil
+}
+
+func (r RomanticEventRepository) FindByPublicToken(ctx context.Context, token string) (*rmodel.RomanticEvent, error) {
+	var event rmodel.RomanticEvent
+	stmt := `SELECT id, event_date, title, description, status FROM romantic_events WHERE public_token = $1`
+
+	if err := r.db.QueryRowContext(ctx, stmt, token).Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.Status); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, model.ErrNoRecord
+		}
+		return nil, db.MapPQError(err)
+	}
+
+	return &event, nil
 }

@@ -24,6 +24,16 @@ type RomanticEventResponseDTO struct {
 	Steps        []*model.EventStep `json:"steps"`
 }
 
+type PublicRomanticEventResponseDTO struct {
+	ID           int64              `json:"id"`
+	EventDate    time.Time          `json:"event_date"`
+	Title        string             `json:"title"`
+	Description  string             `json:"description"`
+	PublishedAt  *time.Time         `json:"published_at"`
+	SimpTargetID int64              `json:"simp_target_id"`
+	Steps        []*model.EventStep `json:"steps"`
+}
+
 type PublishRomanticEventResponseDTO struct {
 	Status model.RomanticEventStatus `json:"status"`
 	Token  string                    `json:"token"`

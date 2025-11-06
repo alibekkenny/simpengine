@@ -139,6 +139,25 @@ definitions:
           $ref: '#/definitions/romanticevent.EventStepResponseDTO'
         type: array
     type: object
+  romanticevent.PublicRomanticEventResponseDTO:
+    properties:
+      description:
+        type: string
+      event_date:
+        type: string
+      id:
+        type: integer
+      published_at:
+        type: string
+      simp_target_id:
+        type: integer
+      steps:
+        items:
+          $ref: '#/definitions/model.EventStep'
+        type: array
+      title:
+        type: string
+    type: object
   romanticevent.RomanticEventRequestDTO:
     properties:
       description:
@@ -582,6 +601,38 @@ paths:
       summary: Download media file
       tags:
       - media
+  /public/romantic-event/{public_token}:
+    get:
+      description: Views a Published romantic event by its public token. Anyone can
+        see this romantic event.
+      parameters:
+      - description: RomanticEvent public token
+        in: path
+        name: public_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Public RomanticEvent
+          schema:
+            $ref: '#/definitions/romanticevent.PublicRomanticEventResponseDTO'
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: View Published romantic event
+      tags:
+      - public_romantic_event
   /romantic-event:
     get:
       description: Views a RomanticEvents of current User.

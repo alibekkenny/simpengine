@@ -52,6 +52,7 @@ func (h *RomanticEventHandler) CreateRomanticEvent(w http.ResponseWriter, r *htt
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Location", fmt.Sprintf("/romantic-event/%d", romanticEventID))
 	json.NewEncoder(w).Encode(RomanticEventResponseDTO{
 		ID:           romanticEventID,
@@ -161,6 +162,7 @@ func (h *RomanticEventHandler) ViewRomanticEvent(w http.ResponseWriter, r *http.
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(RomanticEventResponseDTO{
 		ID:           event.ID,
 		EventDate:    event.EventDate,
@@ -190,6 +192,7 @@ func (h *RomanticEventHandler) ViewRomanticEventsByUser(w http.ResponseWriter, r
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
 
@@ -222,6 +225,7 @@ func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *ht
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(PublishRomanticEventResponseDTO{
 		Status: status,
 		Token:  token,
@@ -413,6 +417,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(StepOptionResponseDTO{
 		ID:    id,
 		Label: body.Label,
@@ -542,6 +547,7 @@ func (h *RomanticEventHandler) ViewAvailableOptions(w http.ResponseWriter, r *ht
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(options)
 }
 
@@ -578,6 +584,7 @@ func (h *RomanticEventHandler) AddTemplateEventStep(w http.ResponseWriter, r *ht
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(TemplateEventStepResponseDTO{
 		ID:          id,
 		Title:       body.Title,
@@ -670,6 +677,7 @@ func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter,
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(StepOptionResponseDTO{
 		ID:    id,
 		Label: body.Label,
@@ -747,6 +755,7 @@ func (h *RomanticEventHandler) ViewTemplateEventSteps(w http.ResponseWriter, r *
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(mapTemplateStepsToDTO(steps))
 }
 
@@ -779,6 +788,7 @@ func (h *RomanticEventHandler) ViewTemplateEventStep(w http.ResponseWriter, r *h
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(ViewTemplateEventStepResponseDTO{
 		ID:          id,
 		Title:       step.Title,
@@ -816,5 +826,43 @@ func (h *RomanticEventHandler) ViewEventSteps(w http.ResponseWriter, r *http.Req
 	}
 
 	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(steps)
+}
+
+// ViewPublicRomanticEvent views RomanticEvent by public token.
+// @Summary      View Published romantic event
+// @Description  Views a Published romantic event by its public token. Anyone can see this romantic event.
+// @Tags         public_romantic_event
+// @Produce      json
+// @Param        public_token   path	string  true  "RomanticEvent public token"
+// @Success      200  {object} 	PublicRomanticEventResponseDTO	"Public RomanticEvent"
+// @Failure      400  {object}  model.ErrorResponse  "Invalid token"
+// @Failure      404  {object}  model.ErrorResponse  "Not Found"
+// @Failure      500  {object}  model.ErrorResponse  "Internal Server Error"
+// @Router       /public/romantic-event/{public_token} [get]
+func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("public_token")
+	if token == "" {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid token", shared_model.ErrInvalidParams))
+		return
+	}
+
+	romanticEvent, err := h.service.GetRomanticEventByPublicToken(r.Context(), token)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(PublicRomanticEventResponseDTO{
+		ID:           romanticEvent.ID,
+		Title:        romanticEvent.Title,
+		Description:  romanticEvent.Description,
+		EventDate:    romanticEvent.EventDate,
+		PublishedAt:  romanticEvent.PublishedAt,
+		SimpTargetID: romanticEvent.SimpTargetID,
+		Steps:        romanticEvent.Steps,
+	})
 }

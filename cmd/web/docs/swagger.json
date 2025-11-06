@@ -459,6 +459,53 @@
                 }
             }
         },
+        "/public/romantic-event/{public_token}": {
+            "get": {
+                "description": "Views a Published romantic event by its public token. Anyone can see this romantic event.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "public_romantic_event"
+                ],
+                "summary": "View Published romantic event",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RomanticEvent public token",
+                        "name": "public_token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Public RomanticEvent",
+                        "schema": {
+                            "$ref": "#/definitions/romanticevent.PublicRomanticEventResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/romantic-event": {
             "get": {
                 "security": [
@@ -2035,6 +2082,35 @@
                     "items": {
                         "$ref": "#/definitions/romanticevent.EventStepResponseDTO"
                     }
+                }
+            }
+        },
+        "romanticevent.PublicRomanticEventResponseDTO": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "event_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "simp_target_id": {
+                    "type": "integer"
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.EventStep"
+                    }
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         },

@@ -60,4 +60,5 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	mux.Handle("GET /template-event/steps", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventSteps)))
 	mux.Handle("GET /template-event/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventStep)))
 
+	mux.Handle("GET /public/romantic-event/{public_token}", http.HandlerFunc(handler.ViewPublicRomanticEvent))
 }

@@ -15,4 +15,5 @@ type RomaticEventRepository interface {
 	FindAllByUserID(ctx context.Context, userID int64) ([]*model.RomanticEvent, error)
 	UpdateStatusAndToken(ctx context.Context, id int64, userID int64, status model.RomanticEventStatus, token string) error
 	UpdateStatus(ctx context.Context, id int64, userID int64, status model.RomanticEventStatus) error
+	FindByPublicToken(ctx context.Context, token string) (*model.RomanticEvent, error)
 }
