@@ -7,9 +7,10 @@ import (
 )
 
 type Config struct {
-	JWTSecret       []byte
-	DB              *sql.DB
-	MinioClient     *minio.Client
-	MinioBucketName string
-	FrontEndHost    string
+	JWTSecret        []byte
+	DB               *sql.DB
+	MinioClient      *minio.Client
+	MinioBucketName  string
+	FrontEndHost     string
+	TelegramBotToken string
 }

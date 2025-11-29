@@ -39,6 +39,7 @@ func main() {
 	minioAccesKey := os.Getenv("MINIO_ACCESS_KEY")
 	minioSecretKey := os.Getenv("MINIO_SECRET_KEY")
 	frontEndHost := os.Getenv("FRONTEND_HOST")
+	tgBotToken := os.Getenv("TELEGRAM_BOT_TOKEN")
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -62,11 +63,12 @@ func main() {
 
 	// Initialize a new instance of our application struct, containing the dependencies.
 	config := &config.Config{
-		JWTSecret:       []byte(jwt),
-		DB:              db,
-		MinioClient:     minioClient,
-		MinioBucketName: minioBucketName,
-		FrontEndHost:    frontEndHost,
+		JWTSecret:        []byte(jwt),
+		DB:               db,
+		MinioClient:      minioClient,
+		MinioBucketName:  minioBucketName,
+		FrontEndHost:     frontEndHost,
+		TelegramBotToken: tgBotToken,
 	}
 
 	app := &application{
