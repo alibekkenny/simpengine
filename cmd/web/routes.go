@@ -6,6 +6,7 @@ import (
 	_ "github.com/alibekkenny/simpengine/cmd/web/docs"
 	"github.com/alibekkenny/simpengine/internal/auth"
 	"github.com/alibekkenny/simpengine/internal/media"
+	"github.com/alibekkenny/simpengine/internal/notification"
 	romanticevent "github.com/alibekkenny/simpengine/internal/romantic_event"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
 	"github.com/alibekkenny/simpengine/internal/user"
@@ -20,7 +21,8 @@ func (app *application) routes() http.Handler {
 	authModule := auth.NewModule(userModule.Repo)
 	simpTargetModule := simptarget.NewModule(app.config.DB)
 	mediaModule := media.NewModule(app.config.DB, app.config.MinioClient, app.config.MinioBucketName)
-	romanticEventModule := romanticevent.NewModule(app.config.DB, simpTargetModule.Service, mediaModule.Service)
+	notificationModule := notification.NewModule(app.config.TelegramBotToken)
+	romanticEventModule := romanticevent.NewModule(app.config.DB, simpTargetModule.Service, mediaModule.Service, userModule.Service, notificationModule.Service)
 
 	userModule.RegisterRoutes(mux, app.config)
 	authModule.RegisterRoutes(mux, app.config)

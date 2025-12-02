@@ -509,6 +509,150 @@ const docTemplate = `{
                 }
             }
         },
+        "/public/romantic-event/{public_token}/accept": {
+            "post": {
+                "description": "Triggered when the simp target accepts the published romantic event link.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "public_romantic_event"
+                ],
+                "summary": "Accept a public RomanticEvent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RomanticEvent public token",
+                        "name": "public_token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Accepted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/public/romantic-event/{public_token}/answers": {
+            "post": {
+                "description": "Allows a simp target to submit step answer choices for a published romantic event.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "public_romantic_event"
+                ],
+                "summary": "Submit answers for a public RomanticEvent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RomanticEvent public token",
+                        "name": "public_token",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Submitted answers",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/romanticevent.SubmitPublicEventAnswersRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Answers submitted successfully"
+                    },
+                    "400": {
+                        "description": "Invalid token or invalid request body",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/public/romantic-event/{public_token}/reject": {
+            "post": {
+                "description": "Triggered when the simp target rejects the published romantic event link.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "public_romantic_event"
+                ],
+                "summary": "Reject a public RomanticEvent",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RomanticEvent public token",
+                        "name": "public_token",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Rejected successfully"
+                    },
+                    "400": {
+                        "description": "Invalid token",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/romantic-event": {
             "get": {
                 "security": [
@@ -2097,8 +2241,8 @@ const docTemplate = `{
                 "event_date": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "integer"
+                "public_token": {
+                    "type": "string"
                 },
                 "published_at": {
                     "type": "string"
@@ -2200,6 +2344,40 @@ const docTemplate = `{
                 },
                 "label": {
                     "type": "string"
+                }
+            }
+        },
+        "romanticevent.SubmitPublicEventAnswersRequestDTO": {
+            "type": "object",
+            "required": [
+                "answers"
+            ],
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.SubmitStepAnswersRequestDTO"
+                    }
+                }
+            }
+        },
+        "romanticevent.SubmitStepAnswersRequestDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "options"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "options": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },

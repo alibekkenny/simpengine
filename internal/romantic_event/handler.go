@@ -861,8 +861,101 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 		Title:        romanticEvent.Title,
 		Description:  romanticEvent.Description,
 		EventDate:    romanticEvent.EventDate,
+		PublicToken:  romanticEvent.PublicToken,
 		PublishedAt:  romanticEvent.PublishedAt,
 		SimpTargetID: romanticEvent.SimpTargetID,
 		Steps:        romanticEvent.Steps,
 	})
+}
+
+// SubmitPublicEventAnswers submits answers for a public RomanticEvent.
+// @Summary      Submit answers for a public RomanticEvent
+// @Description  Allows a simp target to submit step answer choices for a published romantic event.
+// @Tags         public_romantic_event
+// @Accept       json
+// @Produce      json
+// @Param        public_token   path      string                             true  "RomanticEvent public token"
+// @Param        request        body      SubmitPublicEventAnswersRequestDTO  true  "Submitted answers"
+// @Success      204            "Answers submitted successfully"
+// @Failure      400            {object}  model.ErrorResponse                 "Invalid token or invalid request body"
+// @Failure      404            {object}  model.ErrorResponse                 "Event not found"
+// @Failure      500            {object}  model.ErrorResponse                 "Internal Server Error"
+// @Router       /public/romantic-event/{public_token}/answers [post]
+func (h *RomanticEventHandler) SubmitPublicEventAnswers(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("public_token")
+	if token == "" {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid token", shared_model.ErrInvalidParams))
+		return
+	}
+
+	var body SubmitPublicEventAnswersRequestDTO
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrInvalidBody, err))
+		return
+	}
+
+	if err := h.validator.Struct(body); err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w:\n%v", shared_model.ErrValidation, err))
+		return
+	}
+
+	choices := mapDTOToPublicEventChoices(body.EventStepAnswers)
+	if err := h.service.SubmitPublicEventChoices(r.Context(), token, choices); err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// AcceptPublicRomanticEvent accepts a public RomanticEvent.
+// @Summary      Accept a public RomanticEvent
+// @Description  Triggered when the simp target accepts the published romantic event link.
+// @Tags         public_romantic_event
+// @Produce      json
+// @Param        public_token   path      string  true  "RomanticEvent public token"
+// @Success      204            "Accepted successfully"
+// @Failure      400            {object}  model.ErrorResponse  "Invalid token"
+// @Failure      404            {object}  model.ErrorResponse  "Event not found"
+// @Failure      500            {object}  model.ErrorResponse  "Internal Server Error"
+// @Router       /public/romantic-event/{public_token}/accept [post]
+func (h *RomanticEventHandler) AcceptPublicRomanticEvent(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("public_token")
+	if token == "" {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid token", shared_model.ErrInvalidParams))
+		return
+	}
+
+	if err := h.service.AcceptPublicRomanticEvent(r.Context(), token); err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+// RejectPublicRomanticEvent rejects a public RomanticEvent.
+// @Summary      Reject a public RomanticEvent
+// @Description  Triggered when the simp target rejects the published romantic event link.
+// @Tags         public_romantic_event
+// @Produce      json
+// @Param        public_token   path      string  true  "RomanticEvent public token"
+// @Success      204            "Rejected successfully"
+// @Failure      400            {object}  model.ErrorResponse  "Invalid token"
+// @Failure      404            {object}  model.ErrorResponse  "Event not found"
+// @Failure      500            {object}  model.ErrorResponse  "Internal Server Error"
+// @Router       /public/romantic-event/{public_token}/reject [post]
+func (h *RomanticEventHandler) RejectPublicRomanticEvent(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("public_token")
+	if token == "" {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid token", shared_model.ErrInvalidParams))
+		return
+	}
+
+	if err := h.service.RejectPublicRomanticEvent(r.Context(), token); err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

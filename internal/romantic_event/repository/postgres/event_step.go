@@ -10,6 +10,7 @@ import (
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/shared/db"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
+	"github.com/lib/pq"
 )
 
 type EventStepRepository struct {
@@ -228,4 +229,34 @@ func (r EventStepRepository) CreateEventStepMany(ctx context.Context, steps []*r
 	}
 
 	return created, nil
+}
+
+func (r EventStepRepository) CreateAnswers(ctx context.Context, choices []*rmodel.EventStepChoice, eventID int64) error {
+	stmt := `INSERT INTO romantic_event_choices(event_id, step_id, options_ids)
+			VALUES %s`
+
+	var (
+		values []string
+		args   []interface{}
+	)
+	argIndex := 1
+
+	for _, step := range choices {
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d)", argIndex, argIndex+1, argIndex+2))
+		args = append(args, eventID, step.StepID, pq.Array(step.OptionIDs))
+
+		argIndex += 3
+	}
+
+	query := fmt.Sprintf(stmt, strings.Join(values, ","))
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return db.MapPQError(err)
+	}
+
+	if rows.Err() != nil {
+		return db.MapPQError(rows.Err())
+	}
+
+	return nil
 }

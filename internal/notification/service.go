@@ -24,10 +24,10 @@ func NewNotificationService(telegram *TelegramService) *NotificationService {
 func (s *NotificationService) Send(ctx context.Context, user user.User, channel NotificationChanel, message string) error {
 	switch channel {
 	case ChannelTelegram:
-		if s.telegram == nil || user.TelegramChatID == 0 {
+		if s.telegram == nil || user.TelegramChatID == nil || *user.TelegramChatID == 0 {
 			return nil
 		}
-		return s.telegram.SendMessage(ctx, user.TelegramChatID, message)
+		return s.telegram.SendMessage(ctx, *user.TelegramChatID, message)
 	}
 
 	return nil

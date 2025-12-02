@@ -8,10 +8,12 @@ import (
 
 	"github.com/alibekkenny/simpengine/internal/auth"
 	"github.com/alibekkenny/simpengine/internal/media"
+	"github.com/alibekkenny/simpengine/internal/notification"
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository"
 	"github.com/alibekkenny/simpengine/internal/shared/model"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
+	"github.com/alibekkenny/simpengine/internal/user"
 	"github.com/google/uuid"
 )
 
@@ -21,10 +23,27 @@ type RomanticEventService struct {
 	optionRepo        repository.EventStepOptionRepository
 	simpTargetService *simptarget.SimpTargetService
 	mediaService      *media.MediaService
+	userService       *user.UserService
+	notifier          *notification.NotificationService
 }
 
-func NewRomanticEventService(repo repository.RomaticEventRepository, stepRepo repository.EventStepRepository, optionRepo repository.EventStepOptionRepository, simpTargetService *simptarget.SimpTargetService, mediaService *media.MediaService) *RomanticEventService {
-	return &RomanticEventService{repo: repo, stepRepo: stepRepo, optionRepo: optionRepo, simpTargetService: simpTargetService, mediaService: mediaService}
+func NewRomanticEventService(
+	repo repository.RomaticEventRepository,
+	stepRepo repository.EventStepRepository,
+	optionRepo repository.EventStepOptionRepository,
+	simpTargetService *simptarget.SimpTargetService,
+	mediaService *media.MediaService,
+	userService *user.UserService,
+	notifier *notification.NotificationService) *RomanticEventService {
+	return &RomanticEventService{
+		repo:              repo,
+		stepRepo:          stepRepo,
+		optionRepo:        optionRepo,
+		simpTargetService: simpTargetService,
+		mediaService:      mediaService,
+		userService:       userService,
+		notifier:          notifier,
+	}
 }
 
 func (s *RomanticEventService) CreateRomanticEvent(ctx context.Context, eventDate time.Time, title, description string, simpTargetID int64) (int64, error) {
@@ -439,6 +458,107 @@ func (s *RomanticEventService) GetRomanticEventByPublicToken(ctx context.Context
 	event.Steps = steps
 
 	return event, nil
+}
+
+func (s *RomanticEventService) SubmitPublicEventChoices(ctx context.Context, token string, choices []*rmodel.EventStepChoice) error {
+	event, err := s.repo.FindByPublicToken(ctx, token)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: event not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	for _, choice := range choices {
+		existingOptions, err := s.optionRepo.FindAllByEventStepID(ctx, choice.StepID)
+		if err != nil {
+			return fmt.Errorf("%w: %v", model.ErrInternal, err)
+		}
+		if len(existingOptions) == 0 {
+			return fmt.Errorf("%w: options not found", model.ErrNoRecord)
+		}
+
+		existing := make(map[int64]bool, len(existingOptions))
+		for _, opt := range existingOptions {
+			existing[opt.ID] = true
+		}
+
+		for _, optionID := range choice.OptionIDs {
+			if _, ok := existing[optionID]; !ok {
+				return fmt.Errorf("%w: option %d does not belong to this step", model.ErrInvalidParams, optionID)
+			}
+		}
+	}
+
+	if err := s.stepRepo.CreateAnswers(ctx, choices, event.ID); err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: event step not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.repo.UpdateStatus(ctx, event.ID, event.UserID, rmodel.StatusConfirmed); err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return nil
+}
+
+func (s *RomanticEventService) AcceptPublicRomanticEvent(ctx context.Context, token string) error {
+	event, err := s.repo.FindByPublicToken(ctx, token)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: event not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.repo.UpdateStatus(ctx, event.ID, event.UserID, rmodel.StatusAccepted); err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	owner, err := s.userService.GetById(ctx, event.UserID)
+	if err != nil {
+		return err
+	}
+
+	if owner.NotificationsEnabled == true {
+		message := event.Title + " was accepted"
+		if err := s.notifier.Send(ctx, *owner, notification.ChannelTelegram, message); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *RomanticEventService) RejectPublicRomanticEvent(ctx context.Context, token string) error {
+	event, err := s.repo.FindByPublicToken(ctx, token)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return fmt.Errorf("%w: event not found", model.ErrNoRecord)
+		}
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	if err := s.repo.UpdateStatus(ctx, event.ID, event.UserID, rmodel.StatusRejected); err != nil {
+		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	owner, err := s.userService.GetById(ctx, event.UserID)
+	if err != nil {
+		return err
+	}
+
+	if owner.NotificationsEnabled == true {
+		//message := "<quote>Sometimes,\nthings don't go as planned...\nIt's called life</quote>" + event.Title + " was rejected"
+		message := event.Title + " was rejected"
+		if err := s.notifier.Send(ctx, *owner, notification.ChannelTelegram, message); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *RomanticEventService) ensureEventOwnership(ctx context.Context, eventID int64) (int64, error) {

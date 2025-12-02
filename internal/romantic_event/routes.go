@@ -7,8 +7,10 @@ import (
 	"github.com/alibekkenny/simpengine/cmd/config"
 	"github.com/alibekkenny/simpengine/internal/auth"
 	"github.com/alibekkenny/simpengine/internal/media"
+	"github.com/alibekkenny/simpengine/internal/notification"
 	"github.com/alibekkenny/simpengine/internal/romantic_event/repository/postgres"
 	simptarget "github.com/alibekkenny/simpengine/internal/simp-target"
+	"github.com/alibekkenny/simpengine/internal/user"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -16,12 +18,12 @@ type Module struct {
 	Service *RomanticEventService
 }
 
-func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService, mediaService *media.MediaService) *Module {
+func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService, mediaService *media.MediaService, userService *user.UserService, notifier *notification.NotificationService) *Module {
 	eventRepo := postgres.NewRomanticEventRepository(db)
 	stepRepo := postgres.NewEventStepRepository(db)
 	optionRepo := postgres.NewEventStepOptionRepository(db)
 
-	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService, mediaService)
+	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService, mediaService, userService, notifier)
 
 	return &Module{Service: service}
 }
@@ -61,4 +63,7 @@ func (m *Module) RegisterRoutes(mux *http.ServeMux, cfg *config.Config) {
 	mux.Handle("GET /template-event/steps/{id}", auth.AuthMiddleware(http.HandlerFunc(handler.ViewTemplateEventStep)))
 
 	mux.Handle("GET /public/romantic-event/{public_token}", http.HandlerFunc(handler.ViewPublicRomanticEvent))
+	mux.Handle("POST /public/romantic-event/{public_token}/accept", http.HandlerFunc(handler.AcceptPublicRomanticEvent))
+	mux.Handle("POST /public/romantic-event/{public_token}/reject", http.HandlerFunc(handler.RejectPublicRomanticEvent))
+	mux.Handle("POST /public/romantic-event/{public_token}/answers", http.HandlerFunc(handler.SubmitPublicEventAnswers))
 }

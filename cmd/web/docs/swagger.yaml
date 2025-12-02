@@ -145,8 +145,8 @@ definitions:
         type: string
       event_date:
         type: string
-      id:
-        type: integer
+      public_token:
+        type: string
       published_at:
         type: string
       simp_target_id:
@@ -215,6 +215,29 @@ definitions:
         type: integer
       label:
         type: string
+    type: object
+  romanticevent.SubmitPublicEventAnswersRequestDTO:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/romanticevent.SubmitStepAnswersRequestDTO'
+        minItems: 1
+        type: array
+    required:
+    - answers
+    type: object
+  romanticevent.SubmitStepAnswersRequestDTO:
+    properties:
+      id:
+        type: integer
+      options:
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - id
+    - options
     type: object
   romanticevent.TemplateEventStepRequestDTO:
     properties:
@@ -631,6 +654,104 @@ paths:
           schema:
             $ref: '#/definitions/model.ErrorResponse'
       summary: View Published romantic event
+      tags:
+      - public_romantic_event
+  /public/romantic-event/{public_token}/accept:
+    post:
+      description: Triggered when the simp target accepts the published romantic event
+        link.
+      parameters:
+      - description: RomanticEvent public token
+        in: path
+        name: public_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Accepted successfully
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Accept a public RomanticEvent
+      tags:
+      - public_romantic_event
+  /public/romantic-event/{public_token}/answers:
+    post:
+      consumes:
+      - application/json
+      description: Allows a simp target to submit step answer choices for a published
+        romantic event.
+      parameters:
+      - description: RomanticEvent public token
+        in: path
+        name: public_token
+        required: true
+        type: string
+      - description: Submitted answers
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/romanticevent.SubmitPublicEventAnswersRequestDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Answers submitted successfully
+        "400":
+          description: Invalid token or invalid request body
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Submit answers for a public RomanticEvent
+      tags:
+      - public_romantic_event
+  /public/romantic-event/{public_token}/reject:
+    post:
+      description: Triggered when the simp target rejects the published romantic event
+        link.
+      parameters:
+      - description: RomanticEvent public token
+        in: path
+        name: public_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Rejected successfully
+        "400":
+          description: Invalid token
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Event not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      summary: Reject a public RomanticEvent
       tags:
       - public_romantic_event
   /romantic-event:

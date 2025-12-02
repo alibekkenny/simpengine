@@ -25,8 +25,9 @@ type RomanticEventResponseDTO struct {
 }
 
 type PublicRomanticEventResponseDTO struct {
-	ID           int64              `json:"id"`
+	ID           int64              `json:"-"`
 	EventDate    time.Time          `json:"event_date"`
+	PublicToken  *string            `json:"public_token"`
 	Title        string             `json:"title"`
 	Description  string             `json:"description"`
 	PublishedAt  *time.Time         `json:"published_at"`
@@ -89,4 +90,13 @@ type ViewTemplateEventStepResponseDTO struct {
 	Title       string                   `json:"title"`
 	Description string                   `json:"description"`
 	Options     []*StepOptionResponseDTO `json:"options"`
+}
+
+type SubmitStepAnswersRequestDTO struct {
+	ID      int64   `json:"id" validate:"required"`
+	Options []int64 `json:"options" validate:"required,min=1,dive"`
+}
+
+type SubmitPublicEventAnswersRequestDTO struct {
+	EventStepAnswers []SubmitStepAnswersRequestDTO `json:"answers" validate:"required,min=1,dive"`
 }

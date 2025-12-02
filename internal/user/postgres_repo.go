@@ -32,9 +32,9 @@ func (r *PostgresRepository) Create(ctx context.Context, user *User) (int64, err
 
 func (r *PostgresRepository) FindById(ctx context.Context, id int64) (*User, error) {
 	user := &User{}
-	stmt := `SELECT id, login, email, password_hash, role, created_at FROM users WHERE id = $1`
+	stmt := `SELECT id, login, email, password_hash, role, created_at, notifications_enabled, telegram_chat_id FROM users WHERE id = $1`
 
-	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&user.ID, &user.Login, &user.Email, &user.Password, &user.Role, &user.CreatedAt)
+	err := r.db.QueryRowContext(ctx, stmt, id).Scan(&user.ID, &user.Login, &user.Email, &user.Password, &user.Role, &user.CreatedAt, &user.NotificationsEnabled, &user.TelegramChatID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord

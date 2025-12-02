@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -47,6 +48,18 @@ func (s *UserService) Register(ctx context.Context, login, email, password strin
 	}
 
 	return id, nil
+}
+
+func (s *UserService) GetById(ctx context.Context, id int64) (*User, error) {
+	user, err := s.repo.FindById(ctx, id)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return nil, fmt.Errorf("%w: user not found", model.ErrNoRecord)
+		}
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+
+	return user, nil
 }
 
 func isValidLogin(login string) bool {
