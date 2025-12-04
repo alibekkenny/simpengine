@@ -150,6 +150,17 @@ func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int6
 		return "", "", model.ErrInvalidCredentials
 	}
 
+	event, err := s.repo.FindByIDAndUserID(ctx, id, userID)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return "", "", fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+		}
+		return "", "", fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	if event.Status != rmodel.StatusDraft {
+		return "", "", fmt.Errorf("%w: cannot publish event with status %s", model.ErrInvalidState, event.Status)
+	}
+
 	status := rmodel.StatusPublished
 	token := uuid.New().String()
 
@@ -468,6 +479,9 @@ func (s *RomanticEventService) SubmitPublicEventChoices(ctx context.Context, tok
 		}
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
+	if event.Status != rmodel.StatusAccepted {
+		return fmt.Errorf("%w: event is not accepted", model.ErrInternal)
+	}
 
 	for _, choice := range choices {
 		existingOptions, err := s.optionRepo.FindAllByEventStepID(ctx, choice.StepID)
@@ -512,6 +526,9 @@ func (s *RomanticEventService) AcceptPublicRomanticEvent(ctx context.Context, to
 		}
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
+	if event.Status != rmodel.StatusPublished {
+		return fmt.Errorf("%w: event is not published", model.ErrInternal)
+	}
 
 	if err := s.repo.UpdateStatus(ctx, event.ID, event.UserID, rmodel.StatusAccepted); err != nil {
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
@@ -539,6 +556,9 @@ func (s *RomanticEventService) RejectPublicRomanticEvent(ctx context.Context, to
 			return fmt.Errorf("%w: event not found", model.ErrNoRecord)
 		}
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	if event.Status != rmodel.StatusPublished {
+		return fmt.Errorf("%w: event is not published", model.ErrInternal)
 	}
 
 	if err := s.repo.UpdateStatus(ctx, event.ID, event.UserID, rmodel.StatusRejected); err != nil {

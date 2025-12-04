@@ -2250,6 +2250,9 @@ const docTemplate = `{
                 "simp_target_id": {
                     "type": "integer"
                 },
+                "status": {
+                    "$ref": "#/definitions/model.RomanticEventStatus"
+                },
                 "steps": {
                     "type": "array",
                     "items": {

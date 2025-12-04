@@ -151,6 +151,8 @@ definitions:
         type: string
       simp_target_id:
         type: integer
+      status:
+        $ref: '#/definitions/model.RomanticEventStatus'
       steps:
         items:
           $ref: '#/definitions/model.EventStep'

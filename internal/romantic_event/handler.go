@@ -859,6 +859,7 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 	json.NewEncoder(w).Encode(PublicRomanticEventResponseDTO{
 		ID:           romanticEvent.ID,
 		Title:        romanticEvent.Title,
+		Status:       romanticEvent.Status,
 		Description:  romanticEvent.Description,
 		EventDate:    romanticEvent.EventDate,
 		PublicToken:  romanticEvent.PublicToken,
