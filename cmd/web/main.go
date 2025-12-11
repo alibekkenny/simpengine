@@ -18,6 +18,7 @@ import (
 	"os"
 
 	"github.com/alibekkenny/simpengine/cmd/config"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -31,6 +32,10 @@ type application struct {
 }
 
 func main() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found")
+	}
+
 	addr := os.Getenv("ADDR")
 	dsn := os.Getenv("DSN")
 	jwt := os.Getenv("JWT_SECRET")
