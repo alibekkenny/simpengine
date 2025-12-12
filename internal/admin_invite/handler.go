@@ -19,6 +19,7 @@ func (h *AdminInviteHandler) CreateInvite(w http.ResponseWriter, r *http.Request
 		http.Error(w, "could not generate token", http.StatusBadRequest)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"token": token,
 	})

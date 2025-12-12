@@ -52,6 +52,7 @@ func (h *SimpTargetHandler) CreateSimpTarget(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Location", fmt.Sprintf("/simp-target/%d", simpTargetID))
 	json.NewEncoder(w).Encode(CreateSimpTargetResponseDTO{
@@ -162,6 +163,7 @@ func (h *SimpTargetHandler) ViewSimpTarget(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(target)
 }
@@ -184,6 +186,7 @@ func (h *SimpTargetHandler) ViewSimpTargetByUser(w http.ResponseWriter, r *http.
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(targets)
 }

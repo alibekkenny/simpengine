@@ -62,6 +62,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Domain:   h.cfg.FrontEndHost,    // optional, but can help
 	})
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(LoginResponseDTO{
 		Token: token,
