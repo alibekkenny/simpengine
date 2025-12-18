@@ -1,7 +1,7 @@
 # simpengine 💘
-
 **simpengine** is a fun side-project that helps simps shoot their shot at their simp targets.  
 Built with **Go 1.24**, **Postgres 17**, and **MinIO** (soon) for object storage. Runs fully in Docker.
+Live demo: simpengine.xyz
 
 ---
 
