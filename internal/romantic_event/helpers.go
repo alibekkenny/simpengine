@@ -93,3 +93,17 @@ func mapDTOToPublicEventChoices(dtoChoices []SubmitStepAnswersRequestDTO) []*mod
 
 	return choices
 }
+
+func mapChoicesToDTO(choices []*model.EventStepChoice) []EventStepChoiceResponseDTO {
+	dtoChoices := []EventStepChoiceResponseDTO{}
+	for _, choice := range choices {
+		dtoChoices = append(dtoChoices, EventStepChoiceResponseDTO{
+			ID:        choice.ID,
+			EventID:   choice.EventID,
+			StepID:    choice.StepID,
+			OptionIDs: choice.OptionIDs,
+		})
+	}
+
+	return dtoChoices
+}

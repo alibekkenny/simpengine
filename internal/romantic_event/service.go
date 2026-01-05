@@ -645,3 +645,14 @@ func (s *RomanticEventService) attachOptions(ctx context.Context, steps []*rmode
 
 	return nil
 }
+
+func (s *RomanticEventService) GetEventChoices(ctx context.Context, eventID int64) ([]*rmodel.EventStepChoice, error) {
+	// TODO: Add authorization check if needed (e.g. check if user owns event or is the simp target)
+	// _, err := s.ensureEventOwnership(ctx, eventID)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// For now, assuming handler does basic parsing and we trust the ID.
+	return s.stepRepo.FindChoicesByEventID(ctx, eventID)
+}

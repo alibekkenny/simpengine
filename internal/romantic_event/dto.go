@@ -25,15 +25,16 @@ type RomanticEventResponseDTO struct {
 }
 
 type PublicRomanticEventResponseDTO struct {
-	ID           int64                     `json:"-"`
-	EventDate    time.Time                 `json:"event_date"`
-	PublicToken  *string                   `json:"public_token"`
-	Status       model.RomanticEventStatus `json:"status"`
-	Title        string                    `json:"title"`
-	Description  string                    `json:"description"`
-	PublishedAt  *time.Time                `json:"published_at"`
-	SimpTargetID int64                     `json:"simp_target_id"`
-	Steps        []*model.EventStep        `json:"steps"`
+	ID           int64                        `json:"-"`
+	EventDate    time.Time                    `json:"event_date"`
+	PublicToken  *string                      `json:"public_token"`
+	Status       model.RomanticEventStatus    `json:"status"`
+	Title        string                       `json:"title"`
+	Description  string                       `json:"description"`
+	PublishedAt  *time.Time                   `json:"published_at"`
+	SimpTargetID int64                        `json:"simp_target_id"`
+	Steps        []*model.EventStep           `json:"steps"`
+	Answers      []EventStepChoiceResponseDTO `json:"answers,omitempty"`
 }
 
 type PublishRomanticEventResponseDTO struct {
@@ -100,4 +101,11 @@ type SubmitStepAnswersRequestDTO struct {
 
 type SubmitPublicEventAnswersRequestDTO struct {
 	EventStepAnswers []SubmitStepAnswersRequestDTO `json:"answers" validate:"required,min=1,dive"`
+}
+
+type EventStepChoiceResponseDTO struct {
+	ID        int64   `json:"id"`
+	EventID   int64   `json:"event_id"`
+	StepID    int64   `json:"step_id"`
+	OptionIDs []int64 `json:"option_ids"`
 }

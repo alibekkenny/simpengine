@@ -260,3 +260,33 @@ func (r EventStepRepository) CreateAnswers(ctx context.Context, choices []*rmode
 
 	return nil
 }
+
+func (r EventStepRepository) FindChoicesByEventID(ctx context.Context, eventID int64) ([]*rmodel.EventStepChoice, error) {
+	stmt := `SELECT id, event_id, step_id, options_ids FROM romantic_event_choices WHERE event_id = $1`
+
+	rows, err := r.db.QueryContext(ctx, stmt, eventID)
+	if err != nil {
+		return nil, db.MapPQError(err)
+	}
+	defer rows.Close()
+
+	choices := []*rmodel.EventStepChoice{}
+
+	for rows.Next() {
+		var choice rmodel.EventStepChoice
+		var optionIDs pq.Int64Array // Use helper for array scanning
+
+		if err := rows.Scan(&choice.ID, &choice.EventID, &choice.StepID, &optionIDs); err != nil {
+			return nil, db.MapPQError(err)
+		}
+		choice.OptionIDs = []int64(optionIDs) // Convert back to slice
+
+		choices = append(choices, &choice)
+	}
+
+	if rows.Err() != nil {
+		return nil, db.MapPQError(rows.Err())
+	}
+
+	return choices, nil
+}

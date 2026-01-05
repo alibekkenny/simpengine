@@ -18,4 +18,5 @@ type EventStepRepository interface {
 	FindAllTemplates(ctx context.Context) ([]*model.EventStep, error)
 	CreateEventStepMany(ctx context.Context, steps []*model.EventStep, eventID int64) ([]*model.EventStep, error)
 	CreateAnswers(ctx context.Context, choices []*model.EventStepChoice, eventID int64) error
+	FindChoicesByEventID(ctx context.Context, eventID int64) ([]*model.EventStepChoice, error)
 }

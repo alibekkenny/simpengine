@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	shared_model "github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/go-playground/validator/v10"
 )
@@ -854,6 +855,16 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 		return
 	}
 
+	var answers []EventStepChoiceResponseDTO
+	if romanticEvent.Status == rmodel.StatusConfirmed {
+		choices, err := h.service.GetEventChoices(r.Context(), romanticEvent.ID)
+		if err != nil {
+			shared_model.WriteErrorResponse(w, err)
+			return
+		}
+		answers = mapChoicesToDTO(choices)
+	}
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(PublicRomanticEventResponseDTO{
@@ -866,6 +877,7 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 		PublishedAt:  romanticEvent.PublishedAt,
 		SimpTargetID: romanticEvent.SimpTargetID,
 		Steps:        romanticEvent.Steps,
+		Answers:      answers,
 	})
 }
 
@@ -959,4 +971,23 @@ func (h *RomanticEventHandler) RejectPublicRomanticEvent(w http.ResponseWriter, 
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *RomanticEventHandler) GetEventChoices(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	choices, err := h.service.GetEventChoices(r.Context(), id)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(mapChoicesToDTO(choices))
 }
