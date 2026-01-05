@@ -857,7 +857,7 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 
 	var answers []EventStepChoiceResponseDTO
 	if romanticEvent.Status == rmodel.StatusConfirmed {
-		choices, err := h.service.GetEventChoices(r.Context(), romanticEvent.ID)
+		choices, err := h.service.GetPublicEventChoices(r.Context(), token)
 		if err != nil {
 			shared_model.WriteErrorResponse(w, err)
 			return

@@ -648,11 +648,26 @@ func (s *RomanticEventService) attachOptions(ctx context.Context, steps []*rmode
 
 func (s *RomanticEventService) GetEventChoices(ctx context.Context, eventID int64) ([]*rmodel.EventStepChoice, error) {
 	// TODO: Add authorization check if needed (e.g. check if user owns event or is the simp target)
-	// _, err := s.ensureEventOwnership(ctx, eventID)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	_, err := s.ensureEventOwnership(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
 
 	// For now, assuming handler does basic parsing and we trust the ID.
 	return s.stepRepo.FindChoicesByEventID(ctx, eventID)
+}
+
+func (s *RomanticEventService) GetPublicEventChoices(ctx context.Context, token string) ([]*rmodel.EventStepChoice, error) {
+	event, err := s.repo.FindByPublicToken(ctx, token)
+	if err != nil {
+		if errors.Is(err, model.ErrNoRecord) {
+			return nil, fmt.Errorf("%w: event not found", model.ErrNoRecord)
+		}
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	if event.Status != rmodel.StatusConfirmed {
+		return nil, fmt.Errorf("%w: event is not confirmed", model.ErrForbidden)
+	}
+
+	return s.stepRepo.FindChoicesByEventID(ctx, event.ID)
 }
