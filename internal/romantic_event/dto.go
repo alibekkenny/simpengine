@@ -37,10 +37,20 @@ type PublicRomanticEventResponseDTO struct {
 	Answers      []EventStepChoiceResponseDTO `json:"answers,omitempty"`
 }
 
-type PublishRomanticEventResponseDTO struct {
-	Status model.RomanticEventStatus `json:"status"`
-	Token  string                    `json:"token"`
+type RomanticEventDetailResponseDTO struct {
+	ID           int64                        `json:"id"`
+	Status       model.RomanticEventStatus    `json:"status"`
+	EventDate    time.Time                    `json:"event_date"`
+	Title        string                       `json:"title"`
+	Description  string                       `json:"description"`
+	PublicToken  *string                      `json:"public_token"`
+	PublishedAt  *time.Time                   `json:"published_at"`
+	SimpTargetID int64                        `json:"simp_target_id"`
+	Steps        []EventStepResponseDTO       `json:"steps"`
+	Answers      []EventStepChoiceResponseDTO `json:"answers"`
 }
+
+type PublishRomanticEventResponseDTO = RomanticEventDetailResponseDTO
 
 type EventStepRequestDTO struct {
 	Title       string                 `json:"title" validate:"required,min=3"`

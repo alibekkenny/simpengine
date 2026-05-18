@@ -144,21 +144,21 @@ func (s *RomanticEventService) GetRomanticEventByIDAndUserID(ctx context.Context
 	return event, nil
 }
 
-func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int64) (rmodel.RomanticEventStatus, string, error) {
+func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int64) (*rmodel.RomanticEvent, []*rmodel.EventStepChoice, error) {
 	userID, ok := auth.GetUserIDFromContext(ctx)
 	if !ok {
-		return "", "", model.ErrInvalidCredentials
+		return nil, nil, model.ErrInvalidCredentials
 	}
 
 	event, err := s.repo.FindByIDAndUserID(ctx, id, userID)
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
-			return "", "", fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+			return nil, nil, fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
 		}
-		return "", "", fmt.Errorf("%w: %v", model.ErrInternal, err)
+		return nil, nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 	if event.Status != rmodel.StatusDraft {
-		return "", "", fmt.Errorf("%w: cannot publish event with status %s", model.ErrInvalidState, event.Status)
+		return nil, nil, fmt.Errorf("%w: cannot publish event with status %s", model.ErrInvalidState, event.Status)
 	}
 
 	status := rmodel.StatusPublished
@@ -166,12 +166,12 @@ func (s *RomanticEventService) PublishRomanticEvent(ctx context.Context, id int6
 
 	if err := s.repo.UpdateStatusAndToken(ctx, id, userID, status, token); err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
-			return "", "", fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
+			return nil, nil, fmt.Errorf("%w: romantic event not found", model.ErrNoRecord)
 		}
-		return "", "", fmt.Errorf("%w: %v", model.ErrInternal, err)
+		return nil, nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	return status, token, nil
+	return s.GetEventDetail(ctx, id)
 }
 
 func (s *RomanticEventService) AddSteps(ctx context.Context, steps []*rmodel.EventStep, eventID int64) ([]*rmodel.EventStep, error) {
@@ -626,6 +626,22 @@ func (s *RomanticEventService) loadEventWithSteps(ctx context.Context, eventID, 
 
 	event.Steps = steps
 	return event, nil
+}
+
+func (s *RomanticEventService) GetEventDetail(ctx context.Context, eventID int64) (*rmodel.RomanticEvent, []*rmodel.EventStepChoice, error) {
+	userID, ok := auth.GetUserIDFromContext(ctx)
+	if !ok {
+		return nil, nil, model.ErrInvalidCredentials
+	}
+	event, err := s.loadEventWithSteps(ctx, eventID, userID)
+	if err != nil {
+		return nil, nil, err
+	}
+	choices, err := s.GetEventChoices(ctx, eventID)
+	if err != nil {
+		return nil, nil, err
+	}
+	return event, choices, nil
 }
 
 func (s *RomanticEventService) attachOptions(ctx context.Context, steps []*rmodel.EventStep) error {

@@ -110,3 +110,18 @@ func mapChoicesToDTO(choices []*model.EventStepChoice) []EventStepChoiceResponse
 
 	return dtoChoices
 }
+
+func buildDetailResponse(event *model.RomanticEvent, choices []*model.EventStepChoice) RomanticEventDetailResponseDTO {
+	return RomanticEventDetailResponseDTO{
+		ID:           event.ID,
+		Status:       event.Status,
+		EventDate:    event.EventDate,
+		Title:        event.Title,
+		Description:  event.Description,
+		PublicToken:  event.PublicToken,
+		PublishedAt:  event.PublishedAt,
+		SimpTargetID: event.SimpTargetID,
+		Steps:        mapStepsToDTO(event.Steps),
+		Answers:      mapChoicesToDTO(choices),
+	}
+}

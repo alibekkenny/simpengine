@@ -219,18 +219,15 @@ func (h *RomanticEventHandler) PublishRomanticEvent(w http.ResponseWriter, r *ht
 		return
 	}
 
-	status, token, err := h.service.PublishRomanticEvent(r.Context(), id)
+	event, choices, err := h.service.PublishRomanticEvent(r.Context(), id)
 	if err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(PublishRomanticEventResponseDTO{
-		Status: status,
-		Token:  token,
-	})
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(buildDetailResponse(event, choices))
 }
 
 // AddEventStep add step to romantic event.
