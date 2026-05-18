@@ -163,7 +163,7 @@ func (r EventStepRepository) FindByID(ctx context.Context, id int64) (*rmodel.Ev
 }
 
 func (r EventStepRepository) FindAllTemplates(ctx context.Context) ([]*rmodel.EventStep, error) {
-	stmt := `SELECT id, title, description FROM event_steps WHERE event_id IS NULL`
+	stmt := `SELECT id, title, description FROM event_steps WHERE event_id IS NULL ORDER BY step_order ASC`
 
 	rows, err := r.db.QueryContext(ctx, stmt)
 	if err != nil {
