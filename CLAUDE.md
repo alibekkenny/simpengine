@@ -82,3 +82,17 @@ The core entity has a state machine implied by `status` (`draft` / published / e
 ### Config / env vars
 
 `config.Config` (in `cmd/config/config.go`) is the single struct passed to every `RegisterRoutes`. Env vars consumed in `main.go`: `ADDR`, `DSN`, `JWT_SECRET`, `MINIO_ENDPOINT`, `MINIO_BUCKET`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`, `FRONTEND_HOST`, `TELEGRAM_BOT_TOKEN`. Defaults in `docker-compose.yml` are for local dev only.
+
+## Detailed rules
+
+Per-layer conventions and patterns are documented under `.claude/rules/`. Load the relevant file before writing or reviewing code in that layer:
+
+- [Module structure](.claude/rules/module-structure.md)
+- [Handler conventions](.claude/rules/handler.md)
+- [Service conventions](.claude/rules/service.md)
+- [Repository conventions](.claude/rules/repository.md)
+- [Error handling](.claude/rules/error-handling.md)
+- [Auth](.claude/rules/auth.md)
+- [Wiring](.claude/rules/wiring.md)
+
+Slash commands live under `.claude/commands/`: `/new-module`, `/new-endpoint`, `/new-migration`.
