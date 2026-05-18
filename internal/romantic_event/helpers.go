@@ -48,10 +48,11 @@ func mapStepsToDTO(steps []*model.EventStep) []EventStepResponseDTO {
 	dtoSteps := []EventStepResponseDTO{}
 	for _, step := range steps {
 		dtoSteps = append(dtoSteps, EventStepResponseDTO{
-			ID:        step.ID,
-			Title:     step.Title,
-			StepOrder: step.StepOrder,
-			Options:   mapOptionsToDTO(step.Options),
+			ID:          step.ID,
+			Title:       step.Title,
+			Description: step.Description,
+			StepOrder:   step.StepOrder,
+			Options:     mapOptionsToDTO(step.Options),
 		})
 	}
 
