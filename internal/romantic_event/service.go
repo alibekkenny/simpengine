@@ -246,11 +246,13 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
-		if errors.Is(err, model.ErrNoRecord) {
-			return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+	if imgID != 0 {
+		if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+			if errors.Is(err, model.ErrNoRecord) {
+				return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+			}
+			return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 		}
-		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
 	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
@@ -275,11 +277,13 @@ func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
-		if errors.Is(err, model.ErrNoRecord) {
-			return fmt.Errorf("%w: image not found", model.ErrNoRecord)
+	if imgID != 0 {
+		if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+			if errors.Is(err, model.ErrNoRecord) {
+				return fmt.Errorf("%w: image not found", model.ErrNoRecord)
+			}
+			return fmt.Errorf("%w: %v", model.ErrInternal, err)
 		}
-		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
 	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
@@ -372,11 +376,13 @@ func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label stri
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
-		if errors.Is(err, model.ErrNoRecord) {
-			return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+	if imgID != 0 {
+		if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+			if errors.Is(err, model.ErrNoRecord) {
+				return 0, fmt.Errorf("%w: image not found", model.ErrNoRecord)
+			}
+			return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 		}
-		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
 	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
@@ -396,11 +402,13 @@ func (s *RomanticEventService) UpdateTemplateOption(ctx context.Context, id int6
 		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
-	if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
-		if errors.Is(err, model.ErrNoRecord) {
-			return fmt.Errorf("%w: image not found", model.ErrNoRecord)
+	if imgID != 0 {
+		if err := s.mediaService.CheckIfExists(ctx, imgID); err != nil {
+			if errors.Is(err, model.ErrNoRecord) {
+				return fmt.Errorf("%w: image not found", model.ErrNoRecord)
+			}
+			return fmt.Errorf("%w: %v", model.ErrInternal, err)
 		}
-		return fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 
 	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
