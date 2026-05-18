@@ -20,24 +20,24 @@ func NewEventStepOptionRepository(db *sql.DB) EventStepOptionRepository {
 	return EventStepOptionRepository{db: db}
 }
 
-func (r EventStepOptionRepository) CreateEventStepOption(ctx context.Context, label string, imgID int64, eventStepID int64) (int64, error) {
+func (r EventStepOptionRepository) CreateEventStepOption(ctx context.Context, label, description string, imgID int64, eventStepID int64) (int64, error) {
 	var id int64
-	stmt := `INSERT INTO event_step_options(label, img_id, event_step_id)
-	VALUES($1, $2, $3) RETURNING id`
+	stmt := `INSERT INTO event_step_options(label, description, img_id, event_step_id)
+	VALUES($1, $2, $3, $4) RETURNING id`
 
-	if err := r.db.QueryRowContext(ctx, stmt, label, imgID, eventStepID).Scan(&id); err != nil {
+	if err := r.db.QueryRowContext(ctx, stmt, label, description, imgID, eventStepID).Scan(&id); err != nil {
 		return 0, err
 	}
 
 	return id, nil
 }
 
-func (r EventStepOptionRepository) UpdateEventStepOption(ctx context.Context, id int64, label string, imgID int64) error {
+func (r EventStepOptionRepository) UpdateEventStepOption(ctx context.Context, id int64, label, description string, imgID int64) error {
 	stmt := `UPDATE event_step_options
-	SET label = $1, img_id = $2
-	WHERE id = $3`
+	SET label = $1, description = $2, img_id = $3
+	WHERE id = $4`
 
-	rows, err := r.db.ExecContext(ctx, stmt, label, imgID, id)
+	rows, err := r.db.ExecContext(ctx, stmt, label, description, imgID, id)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (r EventStepOptionRepository) DeleteEventStepOption(ctx context.Context, id
 }
 
 func (r EventStepOptionRepository) FindAllByEventStepID(ctx context.Context, stepID int64) ([]*rmodel.EventStepOption, error) {
-	stmt := `SELECT id, label, img_id, event_step_id FROM event_step_options
+	stmt := `SELECT id, label, description, img_id, event_step_id FROM event_step_options
 	WHERE event_step_id = $1`
 
 	rows, err := r.db.QueryContext(ctx, stmt, stepID)
@@ -87,7 +87,7 @@ func (r EventStepOptionRepository) FindAllByEventStepID(ctx context.Context, ste
 
 	for rows.Next() {
 		var option rmodel.EventStepOption
-		if err := rows.Scan(&option.ID, &option.Label, &option.ImgID, &option.EventStepID); err != nil {
+		if err := rows.Scan(&option.ID, &option.Label, &option.Description, &option.ImgID, &option.EventStepID); err != nil {
 			return nil, err
 		}
 
@@ -106,7 +106,7 @@ func (r EventStepOptionRepository) FindAllByEventStepIDs(ctx context.Context, st
 		return map[int64][]*rmodel.EventStepOption{}, nil
 	}
 
-	stmt := `SELECT id, label, img_id, event_step_id FROM event_step_options
+	stmt := `SELECT id, label, description, img_id, event_step_id FROM event_step_options
 	WHERE event_step_id = ANY($1)`
 
 	rows, err := r.db.QueryContext(ctx, stmt, pq.Array(stepIDs))
@@ -119,7 +119,7 @@ func (r EventStepOptionRepository) FindAllByEventStepIDs(ctx context.Context, st
 
 	for rows.Next() {
 		var option rmodel.EventStepOption
-		if err := rows.Scan(&option.ID, &option.Label, &option.ImgID, &option.EventStepID); err != nil {
+		if err := rows.Scan(&option.ID, &option.Label, &option.Description, &option.ImgID, &option.EventStepID); err != nil {
 			return nil, err
 		}
 
@@ -134,7 +134,7 @@ func (r EventStepOptionRepository) FindAllByEventStepIDs(ctx context.Context, st
 }
 
 func (r EventStepOptionRepository) FindAllByUserID(ctx context.Context, userID int64) ([]*rmodel.EventStepOption, error) {
-	stmt := `SELECT o.id, o.label, o.img_id, o.event_step_id FROM event_step_options o
+	stmt := `SELECT o.id, o.label, o.description, o.img_id, o.event_step_id FROM event_step_options o
 	JOIN event_steps s ON s.id = o.event_step_id
     JOIN romantic_events e ON e.id = s.event_id
 	WHERE e.user_id = $1`
@@ -149,7 +149,7 @@ func (r EventStepOptionRepository) FindAllByUserID(ctx context.Context, userID i
 	options := []*rmodel.EventStepOption{}
 	for rows.Next() {
 		var option rmodel.EventStepOption
-		if err := rows.Scan(&option.ID, &option.Label, &option.ImgID, &option.EventStepID); err != nil {
+		if err := rows.Scan(&option.ID, &option.Label, &option.Description, &option.ImgID, &option.EventStepID); err != nil {
 			return nil, db.MapPQError(err)
 		}
 
@@ -164,9 +164,9 @@ func (r EventStepOptionRepository) FindAllByUserID(ctx context.Context, userID i
 }
 
 func (r EventStepOptionRepository) CreateEventStepOptionMany(ctx context.Context, options []*rmodel.EventStepOption, stepID int64) ([]*rmodel.EventStepOption, error) {
-	stmt := `INSERT INTO event_step_options(label, img_id, event_step_id)
+	stmt := `INSERT INTO event_step_options(label, description, img_id, event_step_id)
 			VALUES %s
-			RETURNING id, label, img_id, event_step_id`
+			RETURNING id, label, description, img_id, event_step_id`
 
 	var (
 		values []string
@@ -175,10 +175,10 @@ func (r EventStepOptionRepository) CreateEventStepOptionMany(ctx context.Context
 
 	argIndex := 1
 	for _, option := range options {
-		values = append(values, fmt.Sprintf("($%d, $%d, $%d)", argIndex, argIndex+1, argIndex+2))
-		args = append(args, option.Label, option.ImgID, stepID)
+		values = append(values, fmt.Sprintf("($%d, $%d, $%d, $%d)", argIndex, argIndex+1, argIndex+2, argIndex+3))
+		args = append(args, option.Label, option.Description, option.ImgID, stepID)
 
-		argIndex += 3
+		argIndex += 4
 	}
 
 	query := fmt.Sprintf(stmt, strings.Join(values, ","))
@@ -192,7 +192,7 @@ func (r EventStepOptionRepository) CreateEventStepOptionMany(ctx context.Context
 	created := []*rmodel.EventStepOption{}
 	for rows.Next() {
 		o := rmodel.EventStepOption{}
-		if err := rows.Scan(&o.ID, &o.Label, &o.ImgID, &o.EventStepID); err != nil {
+		if err := rows.Scan(&o.ID, &o.Label, &o.Description, &o.ImgID, &o.EventStepID); err != nil {
 			return nil, db.MapPQError(err)
 		}
 

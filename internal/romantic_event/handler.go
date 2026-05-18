@@ -411,7 +411,7 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	id, err := h.service.AddOption(r.Context(), body.Label, body.ImgID, eventID, stepID)
+	id, err := h.service.AddOption(r.Context(), body.Label, body.Description, body.ImgID, eventID, stepID)
 	if err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
@@ -420,9 +420,10 @@ func (h *RomanticEventHandler) AddStepOption(w http.ResponseWriter, r *http.Requ
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(StepOptionResponseDTO{
-		ID:    id,
-		Label: body.Label,
-		ImgID: body.ImgID,
+		ID:          id,
+		Label:       body.Label,
+		Description: body.Description,
+		ImgID:       body.ImgID,
 	})
 }
 
@@ -476,7 +477,7 @@ func (h *RomanticEventHandler) UpdateStepOption(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if err := h.service.UpdateOption(r.Context(), id, body.Label, body.ImgID, eventID, stepID); err != nil {
+	if err := h.service.UpdateOption(r.Context(), id, body.Label, body.Description, body.ImgID, eventID, stepID); err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
 	}
@@ -671,7 +672,7 @@ func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter,
 		return
 	}
 
-	id, err := h.service.AddTemplateOption(r.Context(), body.Label, body.ImgID, eventStepID)
+	id, err := h.service.AddTemplateOption(r.Context(), body.Label, body.Description, body.ImgID, eventStepID)
 	if err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
@@ -680,9 +681,10 @@ func (h *RomanticEventHandler) AddTemplateEventStepOption(w http.ResponseWriter,
 	w.WriteHeader(http.StatusCreated)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(StepOptionResponseDTO{
-		ID:    id,
-		Label: body.Label,
-		ImgID: body.ImgID,
+		ID:          id,
+		Label:       body.Label,
+		Description: body.Description,
+		ImgID:       body.ImgID,
 	})
 }
 
@@ -729,7 +731,7 @@ func (h *RomanticEventHandler) UpdateTemplateEventStepOption(w http.ResponseWrit
 		return
 	}
 
-	if err := h.service.UpdateTemplateOption(r.Context(), id, body.Label, body.ImgID, stepID); err != nil {
+	if err := h.service.UpdateTemplateOption(r.Context(), id, body.Label, body.Description, body.ImgID, stepID); err != nil {
 		shared_model.WriteErrorResponse(w, err)
 		return
 	}

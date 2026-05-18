@@ -232,7 +232,7 @@ func (s *RomanticEventService) RemoveStep(ctx context.Context, id int64, eventID
 	return nil
 }
 
-func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgID int64, eventID int64, eventStepID int64) (int64, error) {
+func (s *RomanticEventService) AddOption(ctx context.Context, label, description string, imgID int64, eventID int64, eventStepID int64) (int64, error) {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return 0, err
@@ -255,7 +255,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 		}
 	}
 
-	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
+	id, err := s.optionRepo.CreateEventStepOption(ctx, label, description, imgID, eventStepID)
 	if err != nil {
 		return 0, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
@@ -263,7 +263,7 @@ func (s *RomanticEventService) AddOption(ctx context.Context, label string, imgI
 	return id, nil
 }
 
-func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label string, imgID int64, eventID int64, eventStepID int64) error {
+func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label, description string, imgID int64, eventID int64, eventStepID int64) error {
 	_, err := s.ensureEventOwnership(ctx, eventID)
 	if err != nil {
 		return err
@@ -286,7 +286,7 @@ func (s *RomanticEventService) UpdateOption(ctx context.Context, id int64, label
 		}
 	}
 
-	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
+	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, description, imgID); err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return fmt.Errorf("%w: option not found", model.ErrNoRecord)
 		}
@@ -367,7 +367,7 @@ func (s *RomanticEventService) GetTemplateEventSteps(ctx context.Context) ([]*rm
 	return steps, nil
 }
 
-func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label string, imgID int64, eventStepID int64) (int64, error) {
+func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label, description string, imgID int64, eventStepID int64) (int64, error) {
 	_, err := s.stepRepo.FindByID(ctx, eventStepID)
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
@@ -385,7 +385,7 @@ func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label stri
 		}
 	}
 
-	id, err := s.optionRepo.CreateEventStepOption(ctx, label, imgID, eventStepID)
+	id, err := s.optionRepo.CreateEventStepOption(ctx, label, description, imgID, eventStepID)
 	if err != nil {
 		return 0, err
 	}
@@ -393,7 +393,7 @@ func (s *RomanticEventService) AddTemplateOption(ctx context.Context, label stri
 	return id, nil
 }
 
-func (s *RomanticEventService) UpdateTemplateOption(ctx context.Context, id int64, label string, imgID int64, stepID int64) error {
+func (s *RomanticEventService) UpdateTemplateOption(ctx context.Context, id int64, label, description string, imgID int64, stepID int64) error {
 	_, err := s.stepRepo.FindByID(ctx, stepID)
 	if err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
@@ -411,7 +411,7 @@ func (s *RomanticEventService) UpdateTemplateOption(ctx context.Context, id int6
 		}
 	}
 
-	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, imgID); err != nil {
+	if err := s.optionRepo.UpdateEventStepOption(ctx, id, label, description, imgID); err != nil {
 		if errors.Is(err, model.ErrNoRecord) {
 			return fmt.Errorf("%w: template option not found", model.ErrNoRecord)
 		}

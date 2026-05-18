@@ -20,9 +20,10 @@ func mapTemplateOptionsToDTO(options []*model.EventStepOption) []*StepOptionResp
 	dtoOptions := []*StepOptionResponseDTO{}
 	for _, option := range options {
 		dtoOptions = append(dtoOptions, &StepOptionResponseDTO{
-			ID:    option.ID,
-			Label: option.Label,
-			ImgID: option.ImgID,
+			ID:          option.ID,
+			Label:       option.Label,
+			Description: option.Description,
+			ImgID:       option.ImgID,
 		})
 	}
 
@@ -61,8 +62,9 @@ func mapDTOToOptions(dtoOptions []StepOptionRequestDTO) []*model.EventStepOption
 	options := []*model.EventStepOption{}
 	for _, dtoOption := range dtoOptions {
 		options = append(options, &model.EventStepOption{
-			Label: dtoOption.Label,
-			ImgID: dtoOption.ImgID,
+			Label:       dtoOption.Label,
+			Description: dtoOption.Description,
+			ImgID:       dtoOption.ImgID,
 		})
 	}
 
@@ -73,9 +75,10 @@ func mapOptionsToDTO(options []*model.EventStepOption) []StepOptionResponseDTO {
 	dtoOptions := []StepOptionResponseDTO{}
 	for _, option := range options {
 		dtoOptions = append(dtoOptions, StepOptionResponseDTO{
-			ID:    option.ID,
-			Label: option.Label,
-			ImgID: option.ImgID,
+			ID:          option.ID,
+			Label:       option.Label,
+			Description: option.Description,
+			ImgID:       option.ImgID,
 		})
 	}
 
