@@ -204,7 +204,7 @@ func (h *RomanticEventHandler) ViewRomanticEventsByUser(w http.ResponseWriter, r
 // @Accept  	json
 // @Produce  	json
 // @Param 		id  path	 int64	true	"RomanticEvent Id"
-// @Success 	200 {object} RomanticEventResponseDTO
+// @Success 	200 {object} RomanticEventDetailResponseDTO
 // @Failure 	400 {object} model.ErrorResponse "Invalid request (invalid ID, invalid body, or validation error)"
 // @Failure 	401 {object} model.ErrorResponse "Unauthorized (invalid credentials)"
 // @Failure 	404 {object} model.ErrorResponse "RomanticEvent not found"

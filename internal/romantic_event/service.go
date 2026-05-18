@@ -637,9 +637,9 @@ func (s *RomanticEventService) GetEventDetail(ctx context.Context, eventID int64
 	if err != nil {
 		return nil, nil, err
 	}
-	choices, err := s.GetEventChoices(ctx, eventID)
+	choices, err := s.stepRepo.FindChoicesByEventID(ctx, eventID)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
 	}
 	return event, choices, nil
 }
