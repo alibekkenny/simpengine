@@ -66,14 +66,16 @@ type EventStepsResponseDTO struct {
 }
 
 type StepOptionRequestDTO struct {
-	Label string `json:"label" validate:"required,min=3"`
-	ImgID int64  `json:"img_id" validate:"required"`
+	Label       string `json:"label" validate:"required,min=3"`
+	Description string `json:"description"`
+	ImgID       int64  `json:"img_id,string,omitempty"`
 }
 
 type StepOptionResponseDTO struct {
-	ID    int64  `json:"id"`
-	Label string `json:"label"`
-	ImgID int64  `json:"img_id"`
+	ID          int64  `json:"id"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
+	ImgID       int64  `json:"img_id,string,omitempty"`
 }
 
 type TemplateEventStepRequestDTO struct {
