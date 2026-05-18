@@ -972,6 +972,38 @@ func (h *RomanticEventHandler) RejectPublicRomanticEvent(w http.ResponseWriter, 
 	w.WriteHeader(http.StatusNoContent)
 }
 
+// GetEventDetail returns the full event detail (steps, options, submitted answers).
+// @Summary      Get full event detail
+// @Description  Returns the event with steps, options, and submitted answers. Owner-only.
+// @Tags         romantic_event
+// @Produce      json
+// @Param        id   path      int64  true  "Event ID"
+// @Success      200  {object}  RomanticEventDetailResponseDTO
+// @Failure      400  {object}  model.ErrorResponse  "Invalid ID"
+// @Failure      401  {object}  model.ErrorResponse  "Unauthorized"
+// @Failure      404  {object}  model.ErrorResponse  "Not found"
+// @Failure      500  {object}  model.ErrorResponse  "Internal server error"
+// @Security     BearerAuth
+// @Router       /romantic-event/{id}/detail [get]
+func (h *RomanticEventHandler) GetEventDetail(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, fmt.Errorf("%w: invalid id", shared_model.ErrInvalidParams))
+		return
+	}
+
+	event, choices, err := h.service.GetEventDetail(r.Context(), id)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode(buildDetailResponse(event, choices))
+}
+
 func (h *RomanticEventHandler) GetEventChoices(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
