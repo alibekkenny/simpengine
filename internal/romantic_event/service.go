@@ -759,6 +759,11 @@ func (s *RomanticEventService) RecordPublicView(ctx context.Context, event *rmod
 
 func (s *RomanticEventService) notifyOwnerOfView(event *rmodel.RomanticEvent, meta ViewMeta) {
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("record view: panic in notify goroutine for event %d: %v", event.ID, r)
+			}
+		}()
 		ctx := context.Background()
 		owner, err := s.userService.GetById(ctx, event.UserID)
 		if err != nil || owner == nil || !owner.NotificationsEnabled {
