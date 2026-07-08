@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/alibekkenny/simpengine/internal/auth"
 	rmodel "github.com/alibekkenny/simpengine/internal/romantic_event/model"
 	shared_model "github.com/alibekkenny/simpengine/internal/shared/model"
 	"github.com/go-playground/validator/v10"
@@ -830,6 +831,24 @@ func (h *RomanticEventHandler) ViewEventSteps(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(steps)
 }
 
+// optionalOwnerID parses the jwt cookie if present, returning the user id.
+// It never fails the request — the public route stays unauthenticated.
+func optionalOwnerID(r *http.Request) (int64, bool) {
+	c, err := r.Cookie("jwt")
+	if err != nil {
+		return 0, false
+	}
+	claims, err := auth.ParseJWT(c.Value)
+	if err != nil {
+		return 0, false
+	}
+	uid, ok := claims["user_id"].(float64)
+	if !ok {
+		return 0, false
+	}
+	return int64(uid), true
+}
+
 // ViewPublicRomanticEvent views RomanticEvent by public token.
 // @Summary      View Published romantic event
 // @Description  Views a Published romantic event by its public token. Anyone can see this romantic event.
@@ -854,6 +873,39 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 		return
 	}
 
+	// ---- best-effort view tracking (must not fail the page) ----
+	ua := r.UserAgent()
+	ip := ClientIP(r)
+	cookieVal := ""
+	if c, cerr := r.Cookie(visitorCookieName); cerr == nil {
+		cookieVal = c.Value
+	}
+	visitorID, setCookie := ResolveVisitorID(cookieVal, ip, ua)
+	if setCookie {
+		http.SetCookie(w, &http.Cookie{
+			Name:     visitorCookieName,
+			Value:    visitorID,
+			Path:     "/",
+			MaxAge:   60 * 60 * 24 * 365,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+		})
+	}
+	device, os, browser := ParseUserAgent(ua)
+	ownerID, hasOwner := optionalOwnerID(r)
+	meta := ViewMeta{
+		VisitorID: visitorID,
+		Device:    device,
+		OS:        os,
+		Browser:   browser,
+		IP:        ip,
+		IsOwner:   hasOwner && ownerID == romanticEvent.UserID,
+		IsBot:     IsBotUserAgent(ua),
+	}
+	h.service.RecordPublicView(r.Context(), romanticEvent, meta)
+	// -----------------------------------------------------------
+
 	var answers []EventStepChoiceResponseDTO
 	if romanticEvent.Status == rmodel.StatusConfirmed {
 		choices, err := h.service.GetPublicEventChoices(r.Context(), token)
@@ -864,8 +916,8 @@ func (h *RomanticEventHandler) ViewPublicRomanticEvent(w http.ResponseWriter, r 
 		answers = mapChoicesToDTO(choices)
 	}
 
-	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(PublicRomanticEventResponseDTO{
 		ID:           romanticEvent.ID,
 		Title:        romanticEvent.Title,
@@ -999,9 +1051,15 @@ func (h *RomanticEventHandler) GetEventDetail(w http.ResponseWriter, r *http.Req
 		return
 	}
 
+	stats, err := h.service.GetEventViewStats(r.Context(), id)
+	if err != nil {
+		shared_model.WriteErrorResponse(w, err)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_ = json.NewEncoder(w).Encode(buildDetailResponse(event, choices))
+	_ = json.NewEncoder(w).Encode(buildDetailResponseWithStats(event, choices, stats))
 }
 
 func (h *RomanticEventHandler) GetEventChoices(w http.ResponseWriter, r *http.Request) {

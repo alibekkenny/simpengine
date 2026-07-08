@@ -124,5 +124,25 @@ func buildDetailResponse(event *model.RomanticEvent, choices []*model.EventStepC
 		SimpTargetID: event.SimpTargetID,
 		Steps:        mapStepsToDTO(event.Steps),
 		Answers:      mapChoicesToDTO(choices),
+		RecentOpens:  []ViewSummaryDTO{},
 	}
+}
+
+func mapViewSummaries(items []model.EventViewSummary) []ViewSummaryDTO {
+	out := []ViewSummaryDTO{}
+	for _, it := range items {
+		out = append(out, ViewSummaryDTO{Device: it.Device, OS: it.OS, Browser: it.Browser, OpenedAt: it.OpenedAt})
+	}
+	return out
+}
+
+func buildDetailResponseWithStats(event *model.RomanticEvent, choices []*model.EventStepChoice, stats *model.EventViewStats) RomanticEventDetailResponseDTO {
+	dto := buildDetailResponse(event, choices)
+	if stats != nil {
+		dto.Views = stats.Views
+		dto.Opens = stats.Opens
+		dto.LastOpenedAt = stats.LastOpenedAt
+		dto.RecentOpens = mapViewSummaries(stats.RecentOpens)
+	}
+	return dto
 }

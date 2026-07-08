@@ -48,6 +48,17 @@ type RomanticEventDetailResponseDTO struct {
 	SimpTargetID int64                        `json:"simp_target_id"`
 	Steps        []EventStepResponseDTO       `json:"steps"`
 	Answers      []EventStepChoiceResponseDTO `json:"answers"`
+	Views        int                          `json:"views"`
+	Opens        int                          `json:"opens"`
+	LastOpenedAt *time.Time                   `json:"last_opened_at"`
+	RecentOpens  []ViewSummaryDTO             `json:"recent_opens"`
+}
+
+type ViewSummaryDTO struct {
+	Device   string    `json:"device"`
+	OS       string    `json:"os"`
+	Browser  string    `json:"browser"`
+	OpenedAt time.Time `json:"opened_at"`
 }
 
 type PublishRomanticEventResponseDTO = RomanticEventDetailResponseDTO

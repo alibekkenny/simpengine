@@ -20,7 +20,8 @@ definitions:
   media.UploadMediaResponseDTO:
     properties:
       id:
-        type: integer
+        example: "0"
+        type: string
     type: object
   model.ErrorResponse:
     properties:
@@ -48,10 +49,13 @@ definitions:
     type: object
   model.EventStepOption:
     properties:
+      description:
+        type: string
       id:
         type: integer
       img_id:
-        type: integer
+        example: "0"
+        type: string
       label:
         type: string
     type: object
@@ -90,6 +94,19 @@ definitions:
     - StatusRejected
     - StatusConfirmed
     - StatusArchived
+  romanticevent.EventStepChoiceResponseDTO:
+    properties:
+      event_id:
+        type: integer
+      id:
+        type: integer
+      option_ids:
+        items:
+          type: integer
+        type: array
+      step_id:
+        type: integer
+    type: object
   romanticevent.EventStepRequestDTO:
     properties:
       description:
@@ -141,6 +158,10 @@ definitions:
     type: object
   romanticevent.PublicRomanticEventResponseDTO:
     properties:
+      answers:
+        items:
+          $ref: '#/definitions/romanticevent.EventStepChoiceResponseDTO'
+        type: array
       description:
         type: string
       event_date:
@@ -159,6 +180,43 @@ definitions:
         type: array
       title:
         type: string
+    type: object
+  romanticevent.RomanticEventDetailResponseDTO:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/romanticevent.EventStepChoiceResponseDTO'
+        type: array
+      description:
+        type: string
+      event_date:
+        type: string
+      id:
+        type: integer
+      last_opened_at:
+        type: string
+      opens:
+        type: integer
+      public_token:
+        type: string
+      published_at:
+        type: string
+      recent_opens:
+        items:
+          $ref: '#/definitions/romanticevent.ViewSummaryDTO'
+        type: array
+      simp_target_id:
+        type: integer
+      status:
+        $ref: '#/definitions/model.RomanticEventStatus'
+      steps:
+        items:
+          $ref: '#/definitions/romanticevent.EventStepResponseDTO'
+        type: array
+      title:
+        type: string
+      views:
+        type: integer
     type: object
   romanticevent.RomanticEventRequestDTO:
     properties:
@@ -200,21 +258,26 @@ definitions:
     type: object
   romanticevent.StepOptionRequestDTO:
     properties:
+      description:
+        type: string
       img_id:
-        type: integer
+        example: "0"
+        type: string
       label:
         minLength: 3
         type: string
     required:
-    - img_id
     - label
     type: object
   romanticevent.StepOptionResponseDTO:
     properties:
+      description:
+        type: string
       id:
         type: integer
       img_id:
-        type: integer
+        example: "0"
+        type: string
       label:
         type: string
     type: object
@@ -259,6 +322,17 @@ definitions:
       id:
         type: integer
       title:
+        type: string
+    type: object
+  romanticevent.ViewSummaryDTO:
+    properties:
+      browser:
+        type: string
+      device:
+        type: string
+      opened_at:
+        type: string
+      os:
         type: string
     type: object
   romanticevent.ViewTemplateEventStepResponseDTO:
@@ -1272,6 +1346,44 @@ paths:
       summary: Updates romantic event
       tags:
       - romantic_event
+  /romantic-event/{id}/detail:
+    get:
+      description: Returns the event with steps, options, and submitted answers. Owner-only.
+      parameters:
+      - description: Event ID
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/romanticevent.RomanticEventDetailResponseDTO'
+        "400":
+          description: Invalid ID
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "404":
+          description: Not found
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/model.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get full event detail
+      tags:
+      - romantic_event
   /romantic-event/{id}/publish:
     post:
       consumes:
@@ -1291,7 +1403,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/romanticevent.RomanticEventResponseDTO'
+            $ref: '#/definitions/romanticevent.RomanticEventDetailResponseDTO'
         "400":
           description: Invalid request (invalid ID, invalid body, or validation error)
           schema:

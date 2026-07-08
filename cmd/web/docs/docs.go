@@ -1477,6 +1477,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/romantic-event/{id}/detail": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the event with steps, options, and submitted answers. Owner-only.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "romantic_event"
+                ],
+                "summary": "Get full event detail",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Event ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/romanticevent.RomanticEventDetailResponseDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid ID",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/model.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/romantic-event/{id}/publish": {
             "post": {
                 "security": [
@@ -1509,7 +1568,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/romanticevent.RomanticEventResponseDTO"
+                            "$ref": "#/definitions/romanticevent.RomanticEventDetailResponseDTO"
                         }
                     },
                     "400": {
@@ -2056,7 +2115,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 }
             }
         },
@@ -2099,11 +2159,15 @@ const docTemplate = `{
         "model.EventStepOption": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "img_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "label": {
                     "type": "string"
@@ -2157,6 +2221,26 @@ const docTemplate = `{
                 "StatusConfirmed",
                 "StatusArchived"
             ]
+        },
+        "romanticevent.EventStepChoiceResponseDTO": {
+            "type": "object",
+            "properties": {
+                "event_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "option_ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "step_id": {
+                    "type": "integer"
+                }
+            }
         },
         "romanticevent.EventStepRequestDTO": {
             "type": "object",
@@ -2235,6 +2319,12 @@ const docTemplate = `{
         "romanticevent.PublicRomanticEventResponseDTO": {
             "type": "object",
             "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.EventStepChoiceResponseDTO"
+                    }
+                },
                 "description": {
                     "type": "string"
                 },
@@ -2261,6 +2351,62 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "romanticevent.RomanticEventDetailResponseDTO": {
+            "type": "object",
+            "properties": {
+                "answers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.EventStepChoiceResponseDTO"
+                    }
+                },
+                "description": {
+                    "type": "string"
+                },
+                "event_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_opened_at": {
+                    "type": "string"
+                },
+                "opens": {
+                    "type": "integer"
+                },
+                "public_token": {
+                    "type": "string"
+                },
+                "published_at": {
+                    "type": "string"
+                },
+                "recent_opens": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.ViewSummaryDTO"
+                    }
+                },
+                "simp_target_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "$ref": "#/definitions/model.RomanticEventStatus"
+                },
+                "steps": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/romanticevent.EventStepResponseDTO"
+                    }
+                },
+                "title": {
+                    "type": "string"
+                },
+                "views": {
+                    "type": "integer"
                 }
             }
         },
@@ -2323,12 +2469,15 @@ const docTemplate = `{
         "romanticevent.StepOptionRequestDTO": {
             "type": "object",
             "required": [
-                "img_id",
                 "label"
             ],
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "img_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "label": {
                     "type": "string",
@@ -2339,11 +2488,15 @@ const docTemplate = `{
         "romanticevent.StepOptionResponseDTO": {
             "type": "object",
             "properties": {
+                "description": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "integer"
                 },
                 "img_id": {
-                    "type": "integer"
+                    "type": "string",
+                    "example": "0"
                 },
                 "label": {
                     "type": "string"
@@ -2410,6 +2563,23 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "romanticevent.ViewSummaryDTO": {
+            "type": "object",
+            "properties": {
+                "browser": {
+                    "type": "string"
+                },
+                "device": {
+                    "type": "string"
+                },
+                "opened_at": {
+                    "type": "string"
+                },
+                "os": {
                     "type": "string"
                 }
             }
