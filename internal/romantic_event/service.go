@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"html"
+	"log"
+	"strings"
 	"time"
 
 	"github.com/alibekkenny/simpengine/internal/auth"
@@ -697,4 +700,93 @@ func (s *RomanticEventService) GetPublicEventChoices(ctx context.Context, token 
 	}
 
 	return s.stepRepo.FindChoicesByEventID(ctx, event.ID)
+}
+
+const viewDedupWindow = 30 * time.Second
+
+func shouldCountView(meta ViewMeta) bool {
+	return !meta.IsOwner && !meta.IsBot
+}
+
+func nonEmpty(vals ...string) []string {
+	out := []string{}
+	for _, v := range vals {
+		if strings.TrimSpace(v) != "" {
+			out = append(out, v)
+		}
+	}
+	return out
+}
+
+func buildViewPingMessage(targetName, title, device, os, browser string, when time.Time, viewNum int) string {
+	who := "Someone"
+	if strings.TrimSpace(targetName) != "" {
+		who = html.EscapeString(targetName)
+	}
+	dev := strings.Join(nonEmpty(device, os, browser), " · ")
+	if dev == "" {
+		dev = "an unknown device"
+	}
+	return fmt.Sprintf("\U0001F440 <b>%s</b> just opened “%s” — %s, %s. That's view #%d.",
+		who, html.EscapeString(title), html.EscapeString(dev), when.Format("15:04"), viewNum)
+}
+
+// RecordPublicView records a public open (best-effort) and pings the owner.
+// It never returns an error: tracking must not affect the target's page.
+func (s *RomanticEventService) RecordPublicView(ctx context.Context, event *rmodel.RomanticEvent, meta ViewMeta) {
+	if !shouldCountView(meta) {
+		return
+	}
+	if last, err := s.viewRepo.LastViewAt(ctx, event.ID, meta.VisitorID); err == nil && last != nil {
+		if time.Since(*last) < viewDedupWindow {
+			return
+		}
+	}
+	view := rmodel.EventView{
+		EventID:   event.ID,
+		VisitorID: meta.VisitorID,
+		Device:    meta.Device,
+		OS:        meta.OS,
+		Browser:   meta.Browser,
+		IP:        meta.IP,
+	}
+	if err := s.viewRepo.InsertView(ctx, view); err != nil {
+		log.Printf("record view: insert failed for event %d: %v", event.ID, err)
+		return
+	}
+	s.notifyOwnerOfView(event, meta)
+}
+
+func (s *RomanticEventService) notifyOwnerOfView(event *rmodel.RomanticEvent, meta ViewMeta) {
+	go func() {
+		ctx := context.Background()
+		owner, err := s.userService.GetById(ctx, event.UserID)
+		if err != nil || owner == nil || !owner.NotificationsEnabled {
+			return
+		}
+		viewNum := 0
+		if stats, err := s.viewRepo.StatsByEventID(ctx, event.ID, 1); err == nil {
+			viewNum = stats.Views
+		}
+		targetName := ""
+		if t, err := s.simpTargetService.GetByID(ctx, event.SimpTargetID); err == nil && t != nil {
+			targetName = t.Name
+		}
+		msg := buildViewPingMessage(targetName, event.Title, meta.Device, meta.OS, meta.Browser, time.Now(), viewNum)
+		if err := s.notifier.Send(ctx, *owner, notification.ChannelTelegram, msg); err != nil {
+			log.Printf("record view: telegram send failed for event %d: %v", event.ID, err)
+		}
+	}()
+}
+
+// GetEventViewStats returns view stats for an event the caller owns.
+func (s *RomanticEventService) GetEventViewStats(ctx context.Context, eventID int64) (*rmodel.EventViewStats, error) {
+	if _, err := s.ensureEventOwnership(ctx, eventID); err != nil {
+		return nil, err
+	}
+	stats, err := s.viewRepo.StatsByEventID(ctx, eventID, 10)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %v", model.ErrInternal, err)
+	}
+	return &stats, nil
 }

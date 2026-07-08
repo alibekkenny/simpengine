@@ -94,3 +94,9 @@ func (s *SimpTargetService) GetSimpTargetByIDAndUser(ctx context.Context, id int
 
 	return simpTarget, nil
 }
+
+// GetByID fetches a simp target by id without an ownership check.
+// Intended for internal cross-module use (e.g. building notifications).
+func (s *SimpTargetService) GetByID(ctx context.Context, id int64) (*SimpTarget, error) {
+	return s.repo.FindByID(ctx, id)
+}
