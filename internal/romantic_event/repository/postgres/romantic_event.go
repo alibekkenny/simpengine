@@ -162,9 +162,9 @@ func (r RomanticEventRepository) FindAllByUserID(ctx context.Context, userID int
 
 func (r RomanticEventRepository) FindByPublicToken(ctx context.Context, token string) (*rmodel.RomanticEvent, error) {
 	var event rmodel.RomanticEvent
-	stmt := `SELECT id, event_date, title, description, status, user_id FROM romantic_events WHERE public_token = $1`
+	stmt := `SELECT id, event_date, title, description, status, simp_target_id, user_id FROM romantic_events WHERE public_token = $1`
 
-	if err := r.db.QueryRowContext(ctx, stmt, token).Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.Status, &event.UserID); err != nil {
+	if err := r.db.QueryRowContext(ctx, stmt, token).Scan(&event.ID, &event.EventDate, &event.Title, &event.Description, &event.Status, &event.SimpTargetID, &event.UserID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, model.ErrNoRecord
 		}
