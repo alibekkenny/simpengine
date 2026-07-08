@@ -22,8 +22,9 @@ func NewModule(db *sql.DB, simpTargetService *simptarget.SimpTargetService, medi
 	eventRepo := postgres.NewRomanticEventRepository(db)
 	stepRepo := postgres.NewEventStepRepository(db)
 	optionRepo := postgres.NewEventStepOptionRepository(db)
+	viewRepo := postgres.NewEventViewRepository(db)
 
-	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, simpTargetService, mediaService, userService, notifier)
+	service := NewRomanticEventService(eventRepo, stepRepo, optionRepo, viewRepo, simpTargetService, mediaService, userService, notifier)
 
 	return &Module{Service: service}
 }

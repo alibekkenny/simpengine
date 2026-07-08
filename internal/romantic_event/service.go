@@ -21,6 +21,7 @@ type RomanticEventService struct {
 	repo              repository.RomaticEventRepository
 	stepRepo          repository.EventStepRepository
 	optionRepo        repository.EventStepOptionRepository
+	viewRepo          repository.EventViewRepository
 	simpTargetService *simptarget.SimpTargetService
 	mediaService      *media.MediaService
 	userService       *user.UserService
@@ -31,6 +32,7 @@ func NewRomanticEventService(
 	repo repository.RomaticEventRepository,
 	stepRepo repository.EventStepRepository,
 	optionRepo repository.EventStepOptionRepository,
+	viewRepo repository.EventViewRepository,
 	simpTargetService *simptarget.SimpTargetService,
 	mediaService *media.MediaService,
 	userService *user.UserService,
@@ -39,6 +41,7 @@ func NewRomanticEventService(
 		repo:              repo,
 		stepRepo:          stepRepo,
 		optionRepo:        optionRepo,
+		viewRepo:          viewRepo,
 		simpTargetService: simpTargetService,
 		mediaService:      mediaService,
 		userService:       userService,
